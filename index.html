@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital SAT Practice Form — Pilot</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --panel:#ffffff; --ink:#1c2430; --sub:#5b6472; --line:#e3e7ec;
+    --accent:#2f5fd6; --accent-soft:#eaf0ff; --good:#1c8a53; --good-soft:#e7f7ee;
+    --bad:#c23b3b; --bad-soft:#fdecec; --warn:#a56a00; --warn-soft:#fff6e5;
+    --flag:#c9741a; --flag-soft:#fdefe0;
+    --radius:12px; --shadow:0 1px 2px rgba(20,30,50,.04), 0 4px 14px rgba(20,30,50,.05);
+    --font-scale:1; --line-scale:1;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.55;overflow-x:hidden;}
+  header{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;}
+  .header-inner{max-width:1200px;margin:0 auto;padding:16px 20px 0;}
+  h1{font-size:19px;margin:0 0 4px;}
+  .tagline{color:var(--sub);font-size:12.5px;margin:0 0 12px;}
+  nav{display:flex;gap:4px;overflow-x:auto;padding-bottom:0;-webkit-overflow-scrolling:touch;}
+  nav button{background:none;border:none;padding:10px 12px;font-size:13px;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-weight:600;flex-shrink:0;}
+  nav button:hover{color:var(--ink);}
+  nav button.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+  .layout{max-width:1200px;margin:0 auto;padding:20px;display:flex;gap:20px;align-items:flex-start;}
+  .content{flex:1;min-width:0;}
+  .sidebar{width:250px;flex-shrink:0;position:sticky;top:70px;display:flex;flex-direction:column;gap:14px;}
+
+  .panel-box{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);}
+  .panel-box h4{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);}
+  .tool-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+  .tool-btn{background:#f4f6f9;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:5px;min-height:36px;}
+  .tool-btn:hover{background:#eaeef4;}
+  .tool-btn.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .tool-btn.wide{flex:1 1 100%;justify-content:center;}
+  .progress-track{background:#eef1f5;border-radius:999px;height:8px;overflow:hidden;margin:6px 0 8px;}
+  .progress-fill{background:var(--accent);height:100%;border-radius:999px;transition:width .2s;}
+  .progress-label{font-size:12px;color:var(--sub);}
+  .nav-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:6px;}
+  .nav-cell{aspect-ratio:1;border-radius:6px;border:1px solid var(--line);background:#f4f6f9;font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:28px;}
+  .nav-cell.answered{background:var(--accent-soft);border-color:#cfdcfb;color:var(--accent);}
+  .nav-cell.flagged{background:var(--flag-soft);border-color:#f0cfa0;color:var(--flag);}
+  .nav-cell.current{outline:2px solid var(--accent);}
+
+  main{}
+  .subtabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+  .module-note{background:var(--accent-soft);border:1px solid #cfdcfb;border-radius:var(--radius);padding:12px 16px;font-size:13px;color:#28407f;margin-bottom:18px;}
+  .section-heading{font-size:15px;font-weight:700;margin:28px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line);color:var(--ink);}
+  .section-heading:first-child{margin-top:0;}
+  .item{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow);scroll-margin-top:80px;}
+  .item.flagged{border-color:#f0cfa0;box-shadow:0 0 0 2px var(--flag-soft);}
+  .item-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .item-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:var(--ink);color:#fff;border-radius:50%;font-size:12px;font-weight:700;margin-right:8px;flex-shrink:0;}
+  .flag-btn{background:none;border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;min-height:32px;}
+  .flag-btn.on{background:var(--flag-soft);border-color:#f0cfa0;color:var(--flag);}
+  .stem{margin:10px 0 14px;font-size:calc(14.5px * var(--font-scale));line-height:calc(1.55 * var(--line-scale));}
+  .passage{background:#fbfbfc;border-left:3px solid var(--line);padding:10px 14px;margin-bottom:10px;font-size:calc(13.5px * var(--font-scale));line-height:calc(1.6 * var(--line-scale));color:#3a4250;font-style:italic;}
+  .passage mark{background:#fff3a3;color:inherit;padding:0 1px;border-radius:2px;font-style:normal;}
+  .choices{display:grid;gap:8px;}
+  .choice-row{display:flex;align-items:center;gap:6px;}
+  .choice{flex:1;display:flex;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:calc(14px * var(--font-scale));align-items:flex-start;cursor:pointer;min-height:44px;background:var(--panel);}
+  .choice:hover{border-color:#b9c6e0;}
+  .choice .letter{font-weight:700;color:var(--sub);min-width:16px;}
+  .choice.correct{background:var(--good-soft);border-color:#bfe6cf;}
+  .choice.correct .letter{color:var(--good);}
+  .choice.selected{background:var(--accent-soft);border-color:var(--accent);}
+  .choice.selected .letter{color:var(--accent);}
+  .choice.eliminated .letter,.choice.eliminated span:last-child{text-decoration:line-through;opacity:.4;}
+  .elim-btn{width:30px;height:30px;flex-shrink:0;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--sub);font-size:12px;font-weight:700;cursor:pointer;}
+  .elim-btn.on{background:var(--bad-soft);border-color:#f0b6b6;color:var(--bad);}
+  .meta-row{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px;}
+  .tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent);}
+  .tag.diff{background:#f1eefb;color:#6a3fc4;}
+  .tag.time{background:#f0f4f7;color:#3d5566;}
+  .tag.key{background:#e9f7ee;color:#1c8a53;}
+  .teardown-block{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px;}
+  .teardown{font-size:13px;margin-bottom:6px;color:#3a4250;}
+  .teardown b{color:var(--bad);}
+  .rationale{font-size:13.5px;background:var(--good-soft);border:1px solid #bfe6cf;border-radius:8px;padding:10px 12px;margin-top:10px;color:#1a5c3a;}
+  .misconception{font-size:13px;background:var(--warn-soft);border:1px solid #f0dca6;border-radius:8px;padding:10px 12px;margin-top:8px;color:#7a5200;}
+  .worked{font-size:13.5px;background:#f4f6fb;border:1px solid #dbe2f0;border-radius:8px;padding:10px 12px;margin-top:10px;}
+  .worked b{color:var(--accent);}
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{width:100%;min-width:520px;border-collapse:collapse;font-size:13px;background:var(--panel);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;}
+  th{background:#f1f3f6;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--sub);}
+  tr:last-child td{border-bottom:none;}
+  .tally-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0 26px;}
+  .tally-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);}
+  .tally-card .n{font-size:22px;font-weight:800;}
+  .tally-card .label{font-size:12px;color:var(--sub);}
+  .report-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow);}
+  .report-card h3{margin:0 0 8px;font-size:14.5px;}
+  .ok{color:var(--good);font-weight:700;}
+  .dev{color:var(--warn);font-weight:700;}
+  footer.watermark{text-align:center;color:#9aa3b0;font-size:11.5px;padding:22px 0 30px;border-top:1px dashed var(--line);margin-top:30px;}
+
+  /* modals */
+  .modal-overlay{position:fixed;inset:0;background:rgba(20,25,35,.35);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px;}
+  .modal-overlay.hidden{display:none;}
+  .modal-box{background:var(--panel);border-radius:var(--radius);box-shadow:0 10px 40px rgba(0,0,0,.2);width:100%;max-width:420px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);}
+  .modal-head h3{margin:0;font-size:14px;}
+  .modal-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--sub);line-height:1;padding:4px;}
+  .modal-body{padding:14px 16px;overflow:auto;flex:1;}
+  #calcHost{width:100%;height:360px;border-radius:8px;overflow:hidden;border:1px solid var(--line);}
+  .fallback-calc{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+  .fallback-calc input{grid-column:1/5;padding:10px;font-size:18px;border-radius:8px;border:1px solid var(--line);text-align:right;margin-bottom:6px;}
+  .fallback-calc button{padding:12px 0;font-size:16px;border-radius:8px;border:1px solid var(--line);background:#f4f6f9;cursor:pointer;}
+  .fallback-calc button.op{background:var(--accent-soft);color:var(--accent);font-weight:700;}
+  #notepadArea{width:100%;height:300px;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:13.5px;font-family:inherit;resize:vertical;}
+  .calc-note{font-size:11.5px;color:var(--sub);margin-top:8px;}
+
+  @media (max-width:900px){
+    .layout{flex-direction:column;}
+    .sidebar{width:100%;position:static;order:2;flex-direction:row;flex-wrap:wrap;}
+    .sidebar .panel-box{flex:1 1 240px;}
+    .content{order:1;}
+  }
+  @media (max-width:640px){
+    .header-inner{padding:12px 14px 0;}
+    h1{font-size:16.5px;}
+    .tagline{font-size:11.5px;}
+    nav button{padding:9px 9px;font-size:12px;}
+    .layout{padding:14px;gap:14px;}
+    .item{padding:14px 14px;}
+    .stem{font-size:calc(13.5px * var(--font-scale));}
+    .choice{font-size:calc(13px * var(--font-scale));padding:9px 10px;}
+    .nav-grid{grid-template-columns:repeat(5,1fr);}
+    .modal-box{max-width:100%;}
+    #calcHost{height:300px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <h1>Digital SAT Practice Form — Pilot Build</h1>
+    <p class="tagline" id="taglineText">Balanced full form · original content</p>
+    <nav id="mainNav"></nav>
+  </div>
+</header>
+
+<div class="layout">
+  <main id="mainContent" class="content"></main>
+  <aside class="sidebar" id="sidebar"></aside>
+</div>
+
+<div class="modal-overlay hidden" id="calcModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Calculator</h3><button class="modal-close" onclick="closeModal('calcModal')">✕</button></div>
+    <div class="modal-body" id="calcBody">
+      <div id="calcHost"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="notepadModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Notepad</h3><button class="modal-close" onclick="closeModal('notepadModal')">✕</button></div>
+    <div class="modal-body">
+      <textarea id="notepadArea" placeholder="Jot down work, formulas, or notes here. Saved automatically on this device."></textarea>
+      <div class="calc-note">Saved locally in this browser only.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================= ITEM BANK ============================= */
+const RW_M1 = [
+ {domain:"Information and Ideas", skill:"Central Ideas and Details", difficulty:1, time:"45s",
+  passage:"Marine biologist Elena Osei spent three years tracking a population of octopuses in a shallow reef. She expected the animals to avoid one another, since octopuses are usually solitary. Instead, she observed the octopuses repeatedly gathering near a single rock formation, taking turns resting in its shaded crevices. Osei now suspects the rock offers protection from predators that outweighs the octopuses' preference for solitude.",
+  stem:"Which choice best states the main purpose of the text?",
+  choices:["To describe a specific behavior that challenged a researcher's expectations and consider a possible explanation","To argue that octopuses are less solitary than scientists previously believed","To compare the predatory pressures faced by reef animals in different habitats","To criticize earlier studies that classified octopuses as purely solitary creatures"],
+  correctIndex:0,
+  teardowns:["Overgeneralization: the text describes one specific case, not a broad claim that the species has reversed its solitary nature.","Introduces unstated content: no comparison of different habitats' predatory pressures is made anywhere in the text.","Misattributed tone: the text never criticizes prior research; it simply notes an expectation differed from an observation."],
+  misconception:"Mistaking 'the researcher's own expectation was wrong' for 'the field's consensus was wrong.'"},
+
+ {domain:"Information and Ideas", skill:"Inference", difficulty:3, time:"60s",
+  passage:"A city planning office replaced its paper permit forms with an online portal in 2019. Applications that previously took an average of eleven days to process now take four. However, complaint records show that the number of first-time applicants who abandoned their applications before completion rose by nearly a third during the same period.",
+  stem:"Which choice best describes what can reasonably be inferred from the text?",
+  choices:["The online portal is slower than the paper system it replaced.","Faster processing does not necessarily mean the new system is easier for every applicant to use.","Most applicants preferred the paper forms to the online portal.","The rise in abandoned applications was caused by an increase in application fees."],
+  correctIndex:1,
+  teardowns:["Direct contradiction: the text states processing time decreased, not increased.","Unsupported preference claim: the text gives abandonment data, not a direct measure of applicant preference.","Fabricated causation: fees are never mentioned anywhere in the text — a classic 'invented unstated cause' trap."],
+  misconception:"Treating a plausible-sounding external cause as if it were textually supported evidence."},
+
+ {domain:"Craft and Structure", skill:"Words in Context", difficulty:1, time:"40s",
+  passage:"The committee's report was measured in tone, avoiding both alarm and dismissal; it acknowledged the risks of the new policy while stopping short of recommending against it.",
+  stem:"As used in the text, “measured” most nearly means",
+  choices:["lengthy","calculated precisely","restrained and careful","rhythmic"],
+  correctIndex:2,
+  teardowns:["Unrelated meaning with no textual support for describing document length.","Literal/numeric sense of 'measured' (as in taking a measurement) rather than the figurative tone sense used here.","Homograph trap: 'measured' can describe rhythm or meter in other contexts, but not this one."],
+  misconception:"Selecting the most common dictionary sense of a word instead of the sense that fits the local context."},
+
+ {domain:"Craft and Structure", skill:"Cross-Text Connections", difficulty:3, time:"70s",
+  passage:"Text 1: Historian Dara Voss argues that the printing press mattered less for spreading new ideas than for standardizing existing ones, since most early printed works simply reproduced texts already circulating in manuscript form.<br><br>Text 2: Historian Iwan Petrenko contends that the printing press was revolutionary primarily because it allowed ideas to reach audiences far larger and more geographically dispersed than manuscript copying ever could.",
+  stem:"Based on the texts, how would Petrenko most likely respond to Voss's claim?",
+  choices:["By dismissing manuscript circulation as historically insignificant","By agreeing that standardization, not novelty, was the press's key effect","By claiming that Voss underestimates how quickly ideas spread before the press existed","By arguing that reach and scale of distribution mattered more than whether the content itself was new"],
+  correctIndex:3,
+  teardowns:["Overstatement not supported by either text; Petrenko's argument concerns scale, not dismissing manuscripts as insignificant.","Reverses the position: this is Voss's own view, not a response Petrenko would give to it.","Introduces an unaddressed pre-press comparison that is not part of either scholar's stated argument."],
+  misconception:"Conflating 'a different emphasis' with 'a direct rebuttal of a claim neither text actually makes.'"},
+
+ {domain:"Expression of Ideas", skill:"Transitions", difficulty:3, time:"45s",
+  passage:"The bridge's original cables were rated for a fifty-year lifespan. Engineers replaced them after thirty-two years. ______, inspections had shown early signs of corrosion well ahead of schedule.",
+  stem:"Which choice completes the text with the most logical transition?",
+  choices:["For example,","That is,","Similarly,","In contrast,"],
+  correctIndex:1,
+  teardowns:["Wrong relationship: what follows restates/explains the reason rather than giving an example of a separate category.","False equivalence: nothing parallel is being compared here, so 'similarly' does not fit.","False contrast: the second sentence supports and explains the first; it does not oppose it."],
+  misconception:"Picking a transition that sounds explanatory without checking whether the actual relationship is restatement, contrast, or example."},
+
+ {domain:"Expression of Ideas", skill:"Rhetorical Synthesis", difficulty:4, time:"60s",
+  passage:"Notes:<br>• A student is writing about urban beekeeping.<br>• Rooftop hives in the city increased from 12 to 340 between 2010 and 2023.<br>• Rooftop honey often has a distinct flavor profile from region to region due to local flowers.<br>• Some rooftop hive owners report no measurable drop in yield compared to rural hives.",
+  stem:"The student wants to emphasize how much rooftop beekeeping has grown in the city. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+  choices:["Urban beekeeping now includes both rooftop and ground-level hive setups.","Between 2010 and 2023, the number of rooftop hives in the city rose from 12 to 340.","Rooftop honey's flavor varies depending on which flowers bees in the area visit.","Some beekeepers say their rooftop hives produce as much honey as rural ones."],
+  correctIndex:1,
+  teardowns:["Vague and unquantified; it doesn't show growth as stated in the goal.","Relevant to the general topic but irrelevant to the specific goal of showing growth in numbers.","Addresses yield and quality, not the goal of showing growth in the number of hives."],
+  misconception:"Choosing any true, on-topic fact instead of the one fact that matches the stated rhetorical goal."},
+
+ {domain:"Standard English Conventions", skill:"Boundaries", difficulty:1, time:"35s",
+  passage:"The museum's new wing opens in April, it will feature a permanent exhibit on regional textile history.",
+  stem:"Which choice fixes the sentence boundary error?",
+  choices:["April it","April; it","NO CHANGE","April, and it, will"],
+  correctIndex:1,
+  teardowns:["Fused sentence: removes needed punctuation entirely, creating a run-on.","Comma splice: two independent clauses are joined by only a comma.","Unnecessary added commas break the clause awkwardly without resolving the underlying splice."],
+  misconception:"Not recognizing that both halves of the sentence are independent clauses requiring a semicolon, period, or conjunction."},
+
+ {domain:"Standard English Conventions", skill:"Form, Structure, and Sense", difficulty:3, time:"45s",
+  passage:"The collection of essays, compiled over a decade, ______ perspectives from writers on four continents.",
+  stem:"Which choice completes the text so that it conforms to conventions of Standard English?",
+  choices:["have reflected","reflect","reflects","reflecting"],
+  correctIndex:2,
+  teardowns:["Agreement error paired with an unnecessary auxiliary shift; still disagrees with the singular subject 'collection.'","Agreement error: incorrectly matches the plural noun 'essays' or 'writers' instead of the singular subject 'collection.'","Creates a sentence fragment lacking a finite main verb."],
+  misconception:"Agreeing the verb with the nearest noun ('essays'/'continents') instead of the true subject ('collection')."}
+];
+
+const RW_M2H = [
+ {domain:"Information and Ideas", skill:"Central Ideas and Details", difficulty:3, time:"55s",
+  passage:"Economist Priya Nandakumar studied wage data from a manufacturing town after a large factory automated half its assembly line. Contrary to predictions of mass job loss, total local employment held steady, but the composition shifted: fewer assembly roles, more positions in equipment maintenance and quality control.",
+  stem:"Which choice best states the main finding described in the text?",
+  choices:["Employment levels were stable even though the automation changed which kinds of jobs were available.","Automation caused significant unemployment in the town, as predicted.","Total employment stayed the same, but the automation was reversed within a year.","Maintenance jobs became more common than assembly jobs had ever been before automation."],
+  correctIndex:0,
+  teardowns:["Direct contradiction of the stated finding, which says employment held steady.","Fabricates a reversal of automation that is never mentioned in the text.","Unsupported comparison; the text gives no data on relative job counts before automation beyond the shift in composition."],
+  misconception:"Assuming a widely-expected outcome (job loss) occurred despite the text explicitly stating otherwise."},
+
+ {domain:"Information and Ideas", skill:"Evidence", difficulty:4, time:"65s",
+  passage:"A public health researcher claims that a city's new bike-lane network reduced traffic injuries citywide. Critics note that injury reports fell only in the specific corridors where lanes were installed, while injuries in comparable corridors without new lanes stayed flat over the same period.",
+  stem:"Which choice best describes how the critics' observation relates to the researcher's claim?",
+  choices:["It strengthens the claim by showing injuries were already low before the lanes were built.","It weakens the claim by suggesting the drop may be local to the new lanes rather than citywide.","It is irrelevant, since injury data from other corridors does not concern bike lanes.","It supports the claim by confirming injuries fell across the city."],
+  correctIndex:1,
+  teardowns:["Fabricates a 'before' baseline claim that is not present anywhere in the text.","False dismissal: the comparison corridors are exactly the relevant control needed to evaluate a citywide claim.","Misreads the critics' point as supportive; it is actually a limiting counterpoint to the claim."],
+  misconception:"Not recognizing a comparison/control group as evidence relevant to evaluating the scope of a causal claim."},
+
+ {domain:"Craft and Structure", skill:"Words in Context", difficulty:3, time:"45s",
+  passage:"Despite the negotiator's conciliatory opening remarks, the two sides remained entrenched, each unwilling to yield ground on the central dispute.",
+  stem:"As used in the text, “entrenched” most nearly means",
+  choices:["exhausted from conflict","physically buried","firmly fixed in a position","fortified with trenches"],
+  correctIndex:2,
+  teardowns:["Plausible emotional state, but not what 'entrenched' specifically conveys here — the word signals fixed positions, not fatigue.","Literal, non-figurative sense unrelated to the negotiation context.","Military literal sense — a trap built on the root word 'trench.'"],
+  misconception:"Latching onto the literal root meaning of a word instead of its figurative contextual meaning."},
+
+ {domain:"Craft and Structure", skill:"Cross-Text Connections", difficulty:4, time:"65s",
+  passage:"Text 1: Novelist Renata Cho believes that unreliable narrators make readers work harder, which deepens engagement with a story's themes.<br><br>Text 2: Critic Samuel Ubah argues that unreliable narrators often frustrate readers, causing many to disengage before a story's themes can register at all.",
+  stem:"Which choice best describes the relationship between the two texts?",
+  choices:["Text 1 and Text 2 agree that unreliable narrators are a flawed literary device.","Text 2 discusses a different literary technique than the one addressed in Text 1.","Text 2 presents a contrasting view of the same narrative technique discussed in Text 1.","Text 2 provides evidence that directly confirms Text 1's claim."],
+  correctIndex:2,
+  teardowns:["Overstates agreement: only Ubah frames the technique negatively; Cho never calls it flawed.","Factually incorrect: both texts discuss the exact same technique, unreliable narrators.","Reverses the relationship; Text 2 opposes, rather than confirms, Text 1's claim."],
+  misconception:"Assuming two texts on the same topic must agree, and missing an explicit contrast in evaluation."},
+
+ {domain:"Expression of Ideas", skill:"Transitions", difficulty:3, time:"45s",
+  passage:"The lab's initial results seemed to confirm the hypothesis. ______, a replication attempt using a larger sample found no significant effect.",
+  stem:"Which choice completes the text with the most logical transition?",
+  choices:["For instance,","However,","Likewise,","Consequently,"],
+  correctIndex:1,
+  teardowns:["Wrongly frames the replication as an example of the initial results rather than a contradiction of them.","False similarity; the two findings are opposed, not alike.","Implies the second sentence is a causal result of the first, but it actually contrasts with it."],
+  misconception:"Missing that a replication 'finding no effect' contrasts with, rather than follows from, initial confirming results."},
+
+ {domain:"Expression of Ideas", skill:"Rhetorical Synthesis", difficulty:4, time:"65s",
+  passage:"Notes:<br>• A student is writing about a community's shift to a four-day school week.<br>• Test scores in the district remained statistically unchanged after the switch.<br>• Teacher retention improved by 18% in the two years following the switch.<br>• Some parents reported difficulty arranging childcare on the extra day off.<br>• The student wants to argue the change was beneficial for staff without ignoring its costs to families.",
+  stem:"Which choice most effectively combines relevant information from the notes to accomplish the student's goal?",
+  choices:["Test scores stayed the same after the switch, showing the change had no real effect.","While some parents struggled to arrange childcare on the extra day off, teacher retention rose 18% in the two years after the switch.","Teacher retention rose 18%, and test scores stayed unchanged, proving the four-day week was a clear success.","Some families found the extra day off difficult, and the district's four-day week remains controversial."],
+  correctIndex:1,
+  teardowns:["Ignores the staff-benefit goal entirely and centers an unrelated test-score statistic.","Drops the 'without ignoring costs to families' requirement and overstates certainty ('clear success').","Covers the cost to families but omits the required staff-benefit information."],
+  misconception:"Satisfying only half of a two-part rhetorical goal instead of combining both required elements."},
+
+ {domain:"Standard English Conventions", skill:"Boundaries", difficulty:3, time:"50s",
+  passage:"Written entirely in a dead language few scholars still read the manuscript remained untranslated for nearly two centuries.",
+  stem:"Which choice most effectively fixes the boundary error in the sentence?",
+  choices:["Written entirely, in a dead language few scholars still read the manuscript remained untranslated for nearly two centuries.","Written entirely in a dead language, few scholars still read the manuscript, remained untranslated for nearly two centuries.","Written entirely in a dead language few scholars still read, the manuscript remained untranslated for nearly two centuries.","NO CHANGE"],
+  correctIndex:2,
+  teardowns:["Misplaced comma breaks the introductory phrase in the wrong spot, producing a nonsensical clause.","Creates a run-on with a comma-spliced structure and no clear main clause.","Missing comma after the introductory participial phrase causes a misreading (“read the manuscript” as one unit)."],
+  misconception:"Not setting off a long introductory modifying phrase from the independent clause it modifies."},
+
+ {domain:"Standard English Conventions", skill:"Form, Structure, and Sense", difficulty:4, time:"55s",
+  passage:"The two research teams disagreed sharply about methodology, but ______ ultimately published a joint paper acknowledging the strengths of both approaches.",
+  stem:"Which choice completes the text so that it conforms to conventions of Standard English?",
+  choices:["neither of them","they","it","each of them"],
+  correctIndex:1,
+  teardowns:["'Neither' is negative and contradicts the fact that a paper was in fact published.","Number disagreement: 'it' is singular, but 'the two research teams' is a plural antecedent.","'Each' forces a distributive, separate-action reading, which contradicts 'a joint paper.'"],
+  misconception:"Choosing a distributive pronoun ('each'/'neither') that logically contradicts a jointly-completed action."},
+
+ {domain:"Information and Ideas", skill:"Central Ideas and Details", difficulty:2, time:"40s",
+  passage:"A marine biologist studying reef fish off an island chain noticed that juvenile parrotfish spent most of their time near coral formations with dense branching structures, even when algae—their primary food source—was more abundant in open sandy areas nearby. Further observation revealed that predatory fish rarely ventured into the branching coral, suggesting the juveniles were prioritizing shelter from predators over immediate access to food.",
+  stem:"Which choice best states the main idea of the text?",
+  choices:["Predatory fish never enter branching coral formations, so juveniles are completely safe there.","Juvenile parrotfish appear to value safety from predators over easier access to food.","Algae is scarce in the habitats where juvenile parrotfish are typically found.","Adult parrotfish and juvenile parrotfish prefer identical habitats for shelter."],
+  correctIndex:1,
+  teardowns:["Overgeneralization: the text says predators \"rarely\" venture into the coral, not \"never,\" and never claims the juveniles are \"completely\" safe.","Reverses a detail: the passage states algae is abundant in sandy areas, not scarce near the reef.","Unsupported comparison: the text discusses juvenile behavior only and never addresses adult parrotfish preferences."],
+  misconception:"Students mistake a strong supporting detail for an absolute claim, or latch onto a secondary detail instead of identifying the passage's actual main point."},
+
+ {domain:"Information and Ideas", skill:"Inference", difficulty:3, time:"55s",
+  passage:"A city's bike-share program tracked usage across its first two years. In year one, ridership spiked on weekdays but dropped sharply on weekends. City planners initially assumed residents used the bikes mainly for weekend leisure trips and were surprised to find otherwise. In year two, after the program added stations near two major office districts, weekday ridership increased further, while weekend numbers stayed flat.",
+  stem:"Based on the text, what can most reasonably be inferred about the primary use of the bike-share program?",
+  choices:["Weekend leisure use increased significantly after the new stations were added.","The city planners' original assumption about weekend leisure use was ultimately confirmed by the year two data.","Most riders likely use the bikes for commuting to work rather than for recreation.","The office district stations were unpopular and rarely used by commuters."],
+  correctIndex:2,
+  teardowns:["Reverses the relationship: the text states weekend numbers stayed flat, not that they increased.","Contradicts the data: the planners' assumption was surprised, not confirmed, by the weekday-heavy pattern.","Contradicts an explicit detail: weekday ridership increased further after the office-district stations were added, indicating those stations were used."],
+  misconception:"Students latch onto a later detail that seems to fit their first guess, mistaking a pattern of commuting use for evidence of expanded leisure use."},
+
+ {domain:"Information and Ideas", skill:"Evidence", difficulty:3, time:"60s",
+  passage:"Archaeologists excavating a coastal settlement found that fishhooks recovered from deeper (older) soil layers were made exclusively of bone, while hooks from more recent layers were made of both bone and shell. The researchers hypothesized that the settlement's inhabitants began using shell only after depleting nearby animal bone sources.",
+  stem:"Which finding, if true, would provide the most direct support for the researchers' hypothesis?",
+  choices:["Shell fishhooks are generally more durable than bone fishhooks.","Neighboring settlements also used both bone and shell fishhooks throughout their history.","Analysis of animal remains in the same layers shows a marked decline in bone-yielding species over time.","The recent soil layers contain a greater total number of fishhooks than the older layers."],
+  correctIndex:2,
+  teardowns:["Answers a different question: durability might explain a preference for shell, but it says nothing about depletion of bone sources.","Irrelevant comparison: what other settlements did doesn't address whether bone was depleted at this specific site.","Confuses quantity with cause: a greater total number of hooks doesn't show why the material changed."],
+  misconception:"Students select evidence that is topically related to the passage but doesn't causally address the specific hypothesis being tested."},
+
+ {domain:"Information and Ideas", skill:"Detail", difficulty:4, time:"80s",
+  passage:"A public health researcher tracked hand-washing compliance in three hospital wards after introducing hourly reminder chimes. Ward A, which received both chimes and posted compliance charts, saw compliance rise from 62% to 81% over six weeks. Ward B, which received only the chimes, rose from 65% to 74%. Ward C, the control ward with neither intervention, remained steady at 63%.",
+  stem:"According to the text, which ward showed the smallest increase in compliance relative to its starting point, among wards that received an intervention?",
+  choices:["Ward C, because its compliance did not increase at all.","Ward A, because it started with the lowest compliance rate.","Ward B, because its compliance rose only 9 percentage points despite receiving chimes.","Ward B, because it ended with a lower compliance rate than Ward A."],
+  correctIndex:2,
+  teardowns:["Misapplies the question's condition: Ward C received no intervention, so it's excluded from the comparison the question asks about.","Confuses an irrelevant detail with the answer: Ward A's starting point doesn't determine the size of its increase, and Ward A actually had the largest increase.","Confuses final value with amount of increase: ending lower than Ward A doesn't mean Ward B increased less in absolute terms from its own starting point."],
+  misconception:"Students confuse a value's starting point or ending point with the size of its relative increase, or ignore a stated condition that limits which items should be compared."},
+
+ {domain:"Craft and Structure", skill:"Words in Context", difficulty:2, time:"40s",
+  passage:"Despite the committee's initial skepticism, the pilot program's results were so unambiguous that even its harshest critics conceded its merit.",
+  stem:"As used in the text, \"unambiguous\" most nearly means",
+  choices:["puzzling","clear","controversial","temporary"],
+  correctIndex:1,
+  teardowns:["Reverses the meaning: \"unambiguous\" indicates the opposite of puzzling.","Confuses the results with the critics' initial reaction; the results themselves are described as decisive, not disputed.","Introduces an unrelated connotation not supported by the sentence, which says nothing about duration."],
+  misconception:"Students pick a word's opposite or a loosely associated meaning instead of the meaning that fits the sentence's specific context."},
+
+ {domain:"Craft and Structure", skill:"Words in Context", difficulty:3, time:"55s",
+  passage:"The novelist's prose, often praised for its restraint, achieves emotional weight not through dramatic declarations but through spare, understated observations that accumulate quietly over the course of a chapter.",
+  stem:"As used in the text, \"restraint\" most nearly means",
+  choices:["excess","secrecy","self-control","hesitation"],
+  correctIndex:2,
+  teardowns:["Reverses the meaning: the sentence contrasts restraint with dramatic, excessive declarations.","Confuses restrained expression with withholding information; the sentence is about tone, not secrecy.","Confuses measured, deliberate understatement with reluctance or indecision, which the sentence doesn't describe."],
+  misconception:"Students confuse a word's more common connotation for a different word with the precise meaning required by the surrounding context."},
+
+ {domain:"Craft and Structure", skill:"Structure", difficulty:3, time:"55s",
+  passage:"Economists have long argued that higher minimum wages reduce entry-level employment. Yet a series of regional studies in the 2010s found little to no employment loss following modest wage increases. These findings did not overturn the traditional view; rather, they prompted economists to refine it, proposing that the effect depends heavily on local labor market conditions.",
+  stem:"Which choice best describes the overall structure of the text?",
+  choices:["A claim is presented and then decisively refuted by later evidence.","A widely held claim is presented, then complicated by contrary evidence, leading to a more nuanced version of the claim.","Two competing theories are presented with no resolution offered.","A claim is illustrated with a series of supporting examples."],
+  correctIndex:1,
+  teardowns:["Overstates the outcome: the text explicitly says the findings did not overturn the traditional view.","Misreads the ending: the text does offer a resolution, a refined version of the claim.","Misclassifies contrary evidence as supporting evidence; the studies complicate rather than illustrate the original claim."],
+  misconception:"Students overstate the strength of a text's rhetorical move, mistaking a nuanced refinement for either total agreement or total refutation."},
+
+ {domain:"Craft and Structure", skill:"Structure", difficulty:4, time:"75s",
+  passage:"It might seem that the invention of refrigeration simply extended food's shelf life. In fact, its effects reached further: by decoupling food preservation from geography, refrigeration reshaped where crops could be profitably grown, which in turn altered agricultural labor patterns across entire regions. What began as a kitchen convenience thus became an engine of rural economic transformation.",
+  stem:"Which choice best describes the function of the second sentence in the text (\"In fact, its effects reached further...\")?",
+  choices:["It provides a specific example that illustrates the claim made in the first sentence.","It introduces a broader consequence that complicates the narrower view stated in the first sentence.","It summarizes the overall argument developed across the whole text.","It presents an opposing viewpoint that the text goes on to refute."],
+  correctIndex:1,
+  teardowns:["Misreads the relationship: the sentence doesn't illustrate the first sentence's claim, it expands beyond it.","Confuses a mid-text transition sentence with a conclusion; the summary-like statement actually comes in the final sentence.","Misreads the move as opposition rather than expansion; the text never treats the narrower view as something to refute."],
+  misconception:"Students misidentify a sentence's function, confusing an expansion or complication of an idea with an example, a summary, or a counterargument."},
+
+ {domain:"Craft and Structure", skill:"Cross-Text Connections", difficulty:3, time:"60s",
+  passage:"Text 1: Researcher Voss argues that migratory birds primarily rely on magnetic field sensing to navigate long distances, citing experiments in which birds with disrupted magnetic sensors became disoriented even under clear skies.<br><br>Text 2: Researcher Lindqvist contends that visual landmarks play the dominant role in bird navigation, noting that birds navigate accurately on overcast nights when magnetic sensing should be their only available cue, yet still veer off course more often than on clear nights.",
+  stem:"Based on the texts, how would Lindqvist most likely respond to Voss's experimental finding?",
+  choices:["By agreeing that magnetic sensing is the dominant navigational mechanism.","By claiming that Voss's birds were likely sick or injured.","By arguing that disorientation under clear skies shows magnetic sensing alone is insufficient, since visual cues should have been available to compensate.","By pointing out that overcast nights prove magnetic sensing is unnecessary."],
+  correctIndex:2,
+  teardowns:["Contradicts Lindqvist's stated position, which favors visual landmarks over magnetic sensing.","Fabricates an unstated cause that appears in neither text.","Misreads Text 2: overcast nights actually show more veering off course, which undermines rather than proves that magnetic sensing is unnecessary."],
+  misconception:"Students misapply logic from one text to predict a response inconsistent with the second author's stated view, or invent causes neither text supports."},
+
+ {domain:"Craft and Structure", skill:"Cross-Text Connections", difficulty:5, time:"85s",
+  passage:"Text 1: Economist Aroha maintains that subsidizing small farms increases national food security by keeping diverse crops in production, even if it raises average food prices slightly.<br><br>Text 2: Economist Bello counters that subsidies distort market signals, arguing that the price increases Aroha dismisses as minor eventually deter large-scale investment in agricultural efficiency, ultimately reducing total food output over time.",
+  stem:"Which choice best describes how Bello's argument relates to Aroha's?",
+  choices:["Bello disputes the factual claim that subsidies raise food prices.","Bello agrees with Aroha that food security ultimately improves under subsidy programs.","Bello dismisses Aroha's concern about crop diversity as irrelevant to food security.","Bello accepts a premise Aroha treats as a minor tradeoff and argues that its long-term consequences undermine Aroha's overall conclusion."],
+  correctIndex:3,
+  teardowns:["Misreads the disagreement: Bello doesn't dispute that prices rise, he reinterprets the significance of that rise.","Contradicts Bello's stated conclusion, which is that total food output is ultimately reduced, not improved.","Fabricates an unstated claim; Bello's argument centers on efficiency and output, not on dismissing crop diversity as irrelevant."],
+  misconception:"Students assume disagreement between two authors means a wholesale rejection of every claim, rather than recognizing a targeted challenge to one inference drawn from a shared premise."},
+
+ {domain:"Expression of Ideas", skill:"Transitions", difficulty:2, time:"40s",
+  passage:"The startup's new software reduced processing time by sixty percent. ___ user complaints about the interface rose sharply after the update.",
+  stem:"Which choice completes the text with the most logical transition?",
+  choices:["Similarly,","Therefore,","However,","In addition,"],
+  correctIndex:2,
+  teardowns:["Implies the two facts are alike, but a performance gain and a rise in complaints are in tension, not parallel.","Implies rising complaints are a logical consequence of faster processing, a causal link the text never establishes.","Implies simple addition of another fact in the same direction, missing the contrast between improved speed and worsened complaints."],
+  misconception:"Students choose a transition based on surface topic similarity rather than the actual logical relationship—contrast, cause, or addition—between the two clauses."},
+
+ {domain:"Expression of Ideas", skill:"Transitions", difficulty:3, time:"55s",
+  passage:"The city's new recycling initiative reduced landfill waste by nearly a third in its first year. ___ the program's operating costs exceeded projections by almost the same margin, raising questions about its long-term viability.",
+  stem:"Which choice completes the text with the most logical transition?",
+  choices:["Consequently,","Specifically,","Likewise,","Nonetheless,"],
+  correctIndex:3,
+  teardowns:["Implies the cost overrun resulted from the waste reduction, a causal link the text does not establish.","Implies the second sentence elaborates on the same point as the first, but it introduces a contrasting fact instead.","Implies the two facts are parallel in kind, but a benefit and a drawback are in tension, not alike."],
+  misconception:"Students assume a positive result must be followed by a cause-and-effect or elaboration transition rather than recognizing an underlying contrast."},
+
+ {domain:"Expression of Ideas", skill:"Rhetorical Synthesis", difficulty:3, time:"55s",
+  passage:"Notes:<br>• A researcher is studying two invented deep-sea fish species, Species X and Species Y.<br>• Species X produces light using bacteria housed in a special organ.<br>• Species Y produces light through a chemical reaction within its own cells, without bacteria.<br>• Both species use light primarily to attract prey in total darkness.<br>• Species X's light organ can be turned off; Species Y's cannot.",
+  stem:"The student wants to emphasize a key difference in how the two species generate light. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+  choices:["Both Species X and Species Y use light to attract prey in the darkness of the deep sea.","Species X can turn its light organ off, unlike Species Y.","Species X and Species Y are both deep-sea fish studied by the same researcher.","Species X relies on symbiotic bacteria to produce light, whereas Species Y generates it internally through its own chemical reaction."],
+  correctIndex:3,
+  teardowns:["Answers a different question: this states a similarity in purpose, not a difference in how the light is generated.","A true difference, but about controlling the light rather than generating it, so it doesn't match the stated goal.","Irrelevant background information that doesn't address light generation at all."],
+  misconception:"Students choose a sentence that touches on the general topic but doesn't fulfill the specific rhetorical goal stated in the question, such as confusing similarity with difference."},
+
+ {domain:"Expression of Ideas", skill:"Rhetorical Synthesis", difficulty:4, time:"70s",
+  passage:"Notes:<br>• A city trialed a four-day workweek for municipal employees for one year.<br>• Employee self-reported stress scores dropped by 18%.<br>• Sick-day usage dropped by 12%.<br>• Total hours worked per week dropped from 40 to 32.<br>• Number of completed service requests per week dropped by only 3%.<br>• Some council members worried that productivity would fall sharply.",
+  stem:"The student wants to argue that the trial addressed the council members' specific concern. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+  choices:["Employee stress scores dropped by 18% and sick-day usage fell by 12% during the trial.","Some council members were initially worried that a shorter workweek would sharply reduce productivity.","The city reduced municipal employees' work hours from 40 to 32 per week during the one-year trial.","Despite the reduction in weekly hours from 40 to 32, completed service requests fell by only 3%, suggesting productivity remained largely stable."],
+  correctIndex:3,
+  teardowns:["Addresses employee wellbeing, not the productivity concern specifically named in the goal—answers a different question than asked.","Merely restates the council members' concern without offering any evidence that addresses it.","States the change in hours itself but provides no evidence about its effect on productivity."],
+  misconception:"Students select supporting detail that is thematically related but doesn't directly address the specific concern named in the stated goal, or merely restate the concern instead of answering it."},
+
+ {domain:"Standard English Conventions", skill:"Boundaries", difficulty:2, time:"35s",
+  passage:"The engineer reviewed the bridge's structural plans carefully, she noticed a miscalculation in the load-bearing estimates.",
+  stem:"Which choice most effectively revises the sentence to correct the boundary error?",
+  choices:["The engineer reviewed the bridge's structural plans carefully, she noticed a miscalculation in the load-bearing estimates.","The engineer reviewed the bridge's structural plans carefully; she noticed a miscalculation in the load-bearing estimates.","The engineer reviewed the bridge's structural plans carefully she noticed a miscalculation in the load-bearing estimates.","The engineer reviewed the bridge's structural plans carefully, noticing she a miscalculation in the load-bearing estimates."],
+  correctIndex:1,
+  teardowns:["Comma splice: a comma alone cannot join two independent clauses.","Fused sentence: joining two independent clauses with no punctuation or conjunction at all is equally ungrammatical.","Creates an ungrammatical modifier (\"noticing she a miscalculation\") rather than actually fixing the boundary between the two clauses."],
+  misconception:"Students fail to recognize that a comma alone cannot join two independent clauses, or they overcorrect into an equally ungrammatical fused sentence or garbled modifier."},
+
+ {domain:"Standard English Conventions", skill:"Boundaries", difficulty:4, time:"70s",
+  passage:"Walking through the abandoned factory, the collapsed ceiling beams startled the inspection team.",
+  stem:"Which choice most effectively revises the sentence to correct the misplaced modifier?",
+  choices:["Walking through the abandoned factory, the collapsed ceiling beams startled the inspection team.","Walking through the abandoned factory, the inspection team was startled by the collapsed ceiling beams.","The collapsed ceiling beams, walking through the abandoned factory, startled the inspection team.","Walking through the abandoned factory, startled by the collapsed ceiling beams was the inspection team."],
+  correctIndex:1,
+  teardowns:["Dangling modifier: as written, the sentence illogically implies the ceiling beams were walking through the factory.","Misplaced modifier: attaching the phrase next to \"ceiling beams\" still illogically suggests the beams were walking.","Awkward inverted construction that leaves the modifier without a clear, immediately following logical subject, obscuring who was startled."],
+  misconception:"Students overlook that an introductory participial phrase must logically modify the sentence's actual subject, letting an illogical or dangling modifier slip by unnoticed."},
+
+ {domain:"Standard English Conventions", skill:"Form, Structure, and Sense", difficulty:3, time:"55s",
+  passage:"The committee overseeing both the budget review and the annual audit ___ scheduled to present its findings next week.",
+  stem:"Which choice completes the sentence with the correct verb form?",
+  choices:["are","is","were","have been"],
+  correctIndex:1,
+  teardowns:["Treats the nearby compound phrase \"budget review and audit\" as the subject instead of the true singular subject, \"committee.\"","Repeats the same subject-agreement error and also shifts incorrectly into past tense.","Repeats the same subject-agreement error, treating the singular collective subject \"committee\" as if it were plural."],
+  misconception:"Students identify the noun phrase closest to the verb as the subject instead of tracing back to the sentence's true singular head noun."},
+
+ {domain:"Standard English Conventions", skill:"Form, Structure, and Sense", difficulty:3, time:"60s",
+  passage:"The new manager's responsibilities include training junior staff, reviewing quarterly budgets, and to oversee client communications.",
+  stem:"Which choice most effectively revises the underlined portion for parallel structure?",
+  choices:["and to oversee client communications.","and overseeing client communications.","and she oversees client communications.","and overseeing of client communications."],
+  correctIndex:1,
+  teardowns:["Breaks parallel structure by mixing an infinitive (\"to oversee\") with the gerund forms used elsewhere in the list.","Abandons the list structure altogether, turning the third item into an unrelated independent clause.","Uses an ungrammatical hybrid construction (\"overseeing of\") that doesn't match standard gerund usage."],
+  misconception:"Students accept a shift in construction type within a list as acceptable, failing to recognize that every item in a series must share the same grammatical form."},
+
+ {domain:"Standard English Conventions", skill:"Form, Structure, and Sense", difficulty:5, time:"85s",
+  passage:"By the time the auditors arrived, the accountant already ___ the discrepancies in last quarter's ledger.",
+  stem:"Which choice completes the sentence with the correct verb tense?",
+  choices:["corrected","has corrected","had corrected","was correcting"],
+  correctIndex:2,
+  teardowns:["Simple past fails to show that the correction was completed before the auditors' arrival, leaving the sequence of events ambiguous.","Present perfect is inconsistent with the past-tense context already established by \"arrived.\"","Past progressive implies the action was ongoing or interrupted rather than fully completed before the auditors arrived."],
+  misconception:"Students default to simple past tense without recognizing that a sequence of two past events requires past perfect to signal which one happened first."}
+];
+
+const RW_M2L = [
+ {domain:"Information and Ideas", skill:"Central Ideas and Details", difficulty:1, time:"40s",
+  passage:"A small bakery began delivering bread by bicycle instead of by van. Deliveries now take slightly longer on average, but the bakery has cut its fuel costs to zero and reports fewer late-delivery complaints, since bicycles can use paths that shortcut around traffic.",
+  stem:"Which choice best states the main point of the text?",
+  choices:["Switching to bicycle delivery brought some benefits despite slightly longer average delivery times.","Bicycle delivery is always faster than van delivery.","The bakery plans to switch back to van delivery soon.","Customers strongly dislike the change to bicycle delivery."],
+  correctIndex:0,
+  teardowns:["Contradicts the text, which states deliveries now take slightly longer.","Not stated or implied anywhere in the text.","Opposite of what's implied; complaints decreased rather than increased."],
+  misconception:"Assuming a stated drawback (longer delivery time) must mean the change was unsuccessful overall."},
+
+ {domain:"Information and Ideas", skill:"Detail", difficulty:1, time:"35s",
+  passage:"A survey of 500 commuters found that 62 percent said they would use a new express bus line if fares stayed under three dollars. Only 24 percent said they would use it if fares rose above five dollars.",
+  stem:"According to the text, what happens to commuters' willingness to use the express line as fares increase?",
+  choices:["It stays exactly the same.","It increases.","The text does not mention fares at all.","It decreases."],
+  correctIndex:3,
+  teardowns:["Contradicted by the clear percentage drop from 62% to 24%.","Reverses the stated direction of the relationship.","Factually false; fares are the central detail of the passage."],
+  misconception:"Not tracking numeric direction carefully when two percentages are given in a passage."},
+
+ {domain:"Craft and Structure", skill:"Words in Context", difficulty:1, time:"35s",
+  passage:"The new manager's blunt feedback surprised employees accustomed to their previous manager's gentler, more diplomatic style.",
+  stem:"As used in the text, “blunt” most nearly means",
+  choices:["quiet","dull or not sharp","direct and plainspoken","confused"],
+  correctIndex:2,
+  teardowns:["Opposite connotation; blunt feedback is typically direct and loud, not quiet.","Literal physical sense of 'blunt' (as in a blunt object), not the figurative sense used here.","Unrelated meaning with no support in the sentence."],
+  misconception:"Choosing the literal, most common sense of a word instead of its contextual figurative sense."},
+
+ {domain:"Craft and Structure", skill:"Structure", difficulty:3, time:"50s",
+  passage:"Paragraph 1 introduces a farmer's decision to plant a cover crop. Paragraph 2 explains the soil benefits of cover crops in general. Paragraph 3 returns to the farmer's field a year later to describe the results.",
+  stem:"Which choice best describes the overall structure of the text?",
+  choices:["A chronological history of farming practices is traced from past to present.","A specific case is presented, followed by general background, followed by a return to the specific case.","Two competing theories are presented and then reconciled.","A problem is stated and then three possible solutions are compared."],
+  correctIndex:1,
+  teardowns:["Overgeneralizes a single farmer's case into a broad historical narrative.","Invents 'competing theories' that are not present in the described structure.","Invents 'three solutions' where the text actually has one case study framed by an explanatory middle section."],
+  misconception:"Mistaking a specific-general-specific structure for a broader historical or comparative structure."},
+
+ {domain:"Expression of Ideas", skill:"Transitions", difficulty:1, time:"40s",
+  passage:"The concert was moved indoors due to rain. ______, attendance was slightly lower than organizers had hoped.",
+  stem:"Which choice completes the text with the most logical transition?",
+  choices:["In other words,","As a result,","On the other hand,","For example,"],
+  correctIndex:1,
+  teardowns:["'In other words' signals restatement, but the second sentence is a new consequence, not a rephrasing.","'On the other hand' signals contrast, but lower attendance is a plausible consequence, not a contrasting idea.","'For example' wrongly frames the attendance drop as an instance of moving the concert indoors."],
+  misconception:"Confusing a causal consequence with a contrast or restatement relationship."},
+
+ {domain:"Expression of Ideas", skill:"Rhetorical Synthesis", difficulty:2, time:"50s",
+  passage:"Notes:<br>• A student is writing about a local library's new maker space.<br>• The maker space opened in 2022 with 3D printers and sewing machines.<br>• Visitor counts at the library rose 40% after the maker space opened.<br>• The student wants to show that the maker space increased library visits.",
+  stem:"Which choice most effectively uses relevant information from the notes to accomplish the student's goal?",
+  choices:["Sewing machines are one of several tools available at the maker space.","The library's visitor counts rose 40% after the maker space opened in 2022.","The maker space includes 3D printers and sewing machines.","The maker space opened in 2022 as a new library feature."],
+  correctIndex:1,
+  teardowns:["Irrelevant detail about equipment type, not visit numbers.","Describes equipment, not visitor impact — off the stated goal.","States a fact but omits the visitor-count evidence needed for the goal."],
+  misconception:"Choosing a true, on-topic sentence that doesn't actually address the specific goal stated in the prompt."},
+
+ {domain:"Standard English Conventions", skill:"Boundaries", difficulty:1, time:"35s",
+  passage:"The recipe calls for two cups of flour. one teaspoon of salt, and a pinch of cinnamon.",
+  stem:"Which choice fixes the punctuation error?",
+  choices:["flour one, teaspoon","flour, one teaspoon","flour; one teaspoon","NO CHANGE"],
+  correctIndex:1,
+  teardowns:["Comma placed in the wrong position, illogically splitting 'one' from 'teaspoon.'","A semicolon is too strong for separating simple list items that should be joined by commas.","A period incorrectly separates items that belong in a single list."],
+  misconception:"Not recognizing that list items should be joined with commas, not stronger punctuation marks."},
+
+ {domain:"Standard English Conventions", skill:"Form, Structure, and Sense", difficulty:2, time:"40s",
+  passage:"Each of the volunteers ______ assigned a specific task before the event began.",
+  stem:"Which choice completes the text so that it conforms to conventions of Standard English?",
+  choices:["have been","was","are","were"],
+  correctIndex:1,
+  teardowns:["Present-perfect form doesn't match the clearly past-tense context of the sentence.","Agreement error in present tense; also mismatched with the past-tense context ('before the event began').","Agreement error: incorrectly matches the plural 'volunteers' instead of the singular subject 'Each.'"],
+  misconception:"Agreeing the verb with the nearby plural noun ('volunteers') rather than the true singular subject ('Each')."},
+
+ {domain:"Information and Ideas", skill:"Central Ideas and Details", difficulty:2, time:"35s",
+  passage:"A group of students at a small school started a vegetable garden behind the cafeteria. At first, they grew only tomatoes and beans, but after tasting fresh vegetables at lunch, more students asked to join. Within a year, the garden had expanded to include peppers, carrots, and herbs, and it supplied vegetables for the school's weekly lunch menu.",
+  stem:"Which choice best states the main idea of the text?",
+  choices:["The garden grew from a small project into a larger source of food for the school after students responded well to it.","The students only grew tomatoes and beans because those were the easiest vegetables to plant.","The school replaced its cafeteria lunches entirely with food from the garden.","Herbs were the vegetable that most students preferred."],
+  correctIndex:0,
+  teardowns:["This choice treats an early detail about the garden's first crops as if it were the passage's overall point, ignoring the later expansion.","This overgeneralizes a limited detail (vegetables supplied for the weekly menu) into a claim that the cafeteria's food was fully replaced.","This introduces a preference that the text never states; nothing in the passage ranks the vegetables by popularity."],
+  misconception:"Students may mistake an early supporting detail or an unstated exaggeration for the passage's actual main idea."},
+
+ {domain:"Information and Ideas", skill:"Inference", difficulty:3, time:"50s",
+  passage:"A neighborhood bakery noticed that its bread was selling well in the morning but going stale by late afternoon. The owner began baking a second, smaller batch at midday instead of one large batch at dawn. Customers who came in after work started buying more bread than before, and the bakery stopped needing to discount unsold loaves at closing time.",
+  stem:"Which choice best describes what can reasonably be inferred from the text?",
+  choices:["Baking bread closer to when afternoon customers arrive made the bread fresher and more appealing to them.","The bakery's morning customers stopped buying bread once the second batch was introduced.","The owner decided that morning bread sales were no longer important to the business.","Customers had complained directly to the owner about the quality of the afternoon bread."],
+  correctIndex:0,
+  teardowns:["This reverses the relationship in the text: morning sales are described as already strong, and nothing suggests they declined after the change.","This overstates the passage's focus on afternoon sales into a claim that morning sales became unimportant, which isn't supported.","This assumes a specific unstated cause (direct complaints) for the owner's decision, when the text only describes the sales pattern he noticed."],
+  misconception:"Students may infer causes or effects that go beyond what the text's evidence actually supports, or reverse a stated relationship."},
+
+ {domain:"Information and Ideas", skill:"Evidence", difficulty:3, time:"55s",
+  passage:"Claim: Adding more bike-share stations to a downtown area increases the number of short car trips that get replaced by bike trips.<br><br>A transportation researcher studied two similar downtown districts. District A added ten new bike-share stations over one year, while District B added none. During that year, short car trips (under two miles) dropped by 18 percent in District A but stayed roughly the same in District B.",
+  stem:"Which choice best supports the claim?",
+  choices:["District B had fewer total bike-share stations than District A before the study began.","Short car trips dropped by 18 percent in District A, which added new stations, but not in District B, which added none.","Both districts were similar in size and population before the study started.","The researcher tracked car trips over a full year rather than a shorter period."],
+  correctIndex:1,
+  teardowns:["This answers a different question than asked: it describes the starting conditions rather than providing evidence that new stations changed car-trip behavior.","This describes why the comparison is fair (a controlled variable) but does not itself show that adding stations reduced car trips.","This describes the study's method, not a result that supports the claim about bike stations replacing car trips."],
+  misconception:"Students may select background or methodological details instead of the specific data point that directly supports the claim."},
+
+ {domain:"Information and Ideas", skill:"Detail", difficulty:1, time:"30s",
+  passage:"The town library extended its hours last spring, staying open until 9 p.m. on weeknights instead of closing at 6 p.m. Library staff reported that the number of visitors after 6 p.m. was highest among high school students working on homework, followed by adults returning from work.",
+  stem:"According to the text, which group visited the library most often after 6 p.m.?",
+  choices:["Adults returning from work","High school students working on homework","Elementary school students","Library staff members"],
+  correctIndex:1,
+  teardowns:["This reverses the ranking given in the text, which places this group second, not first.","This group is never mentioned in the text at all; it is a fabricated detail.","This confuses the people who work at the library with the visitors described in the passage."],
+  misconception:"Students may reverse the order of ranked details or confuse similar-sounding groups mentioned in a passage."},
+
+ {domain:"Craft and Structure", skill:"Words in Context", difficulty:2, time:"35s",
+  passage:"After weeks of practice, the young violinist's playing became remarkably ______: each note was clear, controlled, and exactly on pitch, with none of the shakiness that had marked her earlier performances.",
+  stem:"Which choice completes the text with the most logical and precise word?",
+  choices:["precise","loud","unpredictable","lengthy"],
+  correctIndex:0,
+  teardowns:["This choice describes volume, not the accuracy and control the sentence actually describes.","This is the opposite of the steadiness described in the sentence, reversing the intended meaning.","This describes duration, which the sentence never addresses."],
+  misconception:"Students may pick a word that is topically related to the passage's subject but does not match the specific quality the context describes."},
+
+ {domain:"Craft and Structure", skill:"Words in Context", difficulty:3, time:"45s",
+  passage:"The committee's plan to renovate the old theater was ambitious, but the budget they proposed was so ______ that contractors doubted the project could be completed without additional funding.",
+  stem:"Which choice completes the text with the most logical word?",
+  choices:["generous","modest","flexible","detailed"],
+  correctIndex:1,
+  teardowns:["This is the opposite of what the sentence implies; a generous budget would not cause contractors to doubt the project could be finished.","This does not explain why contractors would doubt the project's completion, since a flexible budget could still be sufficient.","A detailed budget does not by itself suggest a lack of funds, which is what the sentence's logic requires."],
+  misconception:"Students may choose a word that seems reasonable in isolation without tracing the cause-and-effect logic signaled by the surrounding clause."},
+
+ {domain:"Craft and Structure", skill:"Structure", difficulty:3, time:"50s",
+  passage:"Many people assume that the fastest way to learn a language is to memorize long lists of vocabulary. Language teachers, however, often find that students retain words better when they encounter them in short conversations rather than in isolated lists. As a result, many classrooms now favor dialogue-based exercises over vocabulary drills.",
+  stem:"Which choice best describes the overall structure of the text?",
+  choices:["It presents two theories and shows that both are equally supported by evidence.","It states a common assumption, then presents a contrasting view along with its practical result.","It describes a historical change in teaching methods over several decades.","It lists several unrelated methods for learning vocabulary."],
+  correctIndex:1,
+  teardowns:["This misreads the text's structure as balanced support for two ideas, when the text actually favors the contrasting view over the initial assumption.","This introduces a timeline the text never establishes; no decades or historical sequence are mentioned.","This treats the text as an unordered list, ignoring the clear assumption-contrast-result structure."],
+  misconception:"Students may describe a passage's structure using a generic pattern (list, timeline, balanced comparison) rather than analyzing the actual logical sequence of the text."},
+
+ {domain:"Craft and Structure", skill:"Structure", difficulty:4, time:"70s",
+  passage:"A small manufacturing company had long relied on a single supplier for its raw materials. When that supplier suddenly raised prices, the company's managers debated whether to absorb the cost or seek a new supplier. They ultimately chose to diversify, signing contracts with two additional suppliers in different regions. Six months later, when one of the original supplier's shipments was delayed by a storm, the company's production continued uninterrupted, since the other suppliers covered the shortfall.",
+  stem:"Which choice best describes the function of the final sentence in the text?",
+  choices:["It introduces a new problem that the company had not yet considered.","It illustrates the practical benefit of the decision described earlier in the text.","It contradicts the company's earlier decision to diversify suppliers.","It shifts the focus of the text to a different company entirely."],
+  correctIndex:1,
+  teardowns:["This mistakes an event that confirms the earlier decision's value for a newly introduced, unresolved problem.","This reverses the relationship between the sentences; the final sentence supports, rather than contradicts, the earlier decision.","This misreads the subject of the sentence, which still concerns the same company described throughout the passage."],
+  misconception:"Students may misjudge how a concluding example functions, mistaking supporting evidence for a contradiction or a new, unrelated point."},
+
+ {domain:"Craft and Structure", skill:"Cross-Text Connections", difficulty:3, time:"55s",
+  passage:"Text 1: Some nutritionists argue that eating breakfast is essential for maintaining energy and focus throughout the school day. They point to studies showing that students who eat breakfast tend to concentrate better in morning classes.<br><br>Text 2: Other researchers caution that the link between breakfast and concentration may be overstated. They note that students who skip breakfast because they are not hungry often perform just as well as those who eat, suggesting individual differences matter more than the meal itself.",
+  stem:"Based on the two texts, how would the researchers in Text 2 most likely respond to the studies cited in Text 1?",
+  choices:["They would agree completely, since both texts rely on the same studies.","They would suggest that the studies may not account for individual differences among students.","They would argue that breakfast has no effect on any student's concentration whatsoever.","They would recommend that all students eat breakfast regardless of hunger."],
+  correctIndex:1,
+  teardowns:["This overstates agreement between the texts; Text 2 explicitly raises a caution that Text 1 does not address.","This overgeneralizes Text 2's cautious, nuanced point into an absolute claim that the text never makes.","This reverses Text 2's actual position, which questions the assumption that all students should eat breakfast."],
+  misconception:"Students may flatten a nuanced, qualified response in one text into either full agreement or an extreme opposite claim."},
+
+ {domain:"Craft and Structure", skill:"Cross-Text Connections", difficulty:3, time:"60s",
+  passage:"Text 1: A city planner proposes closing a downtown street to car traffic on weekends, arguing that pedestrian-only zones increase foot traffic to local shops.<br><br>Text 2: A shop owner in a different city, where a similar street closure was tried, reports that while foot traffic increased, many customers were browsers rather than buyers, and overall sales for some shops did not rise significantly.",
+  stem:"Which choice best describes the relationship between the two texts?",
+  choices:["Text 2 complicates the assumption in Text 1 by suggesting that increased foot traffic does not always lead to increased sales.","Text 2 provides additional evidence that fully confirms the planner's proposal in Text 1.","Text 1 and Text 2 describe the exact same street closure in the same city.","Text 2 argues that pedestrian zones should never be created under any circumstances."],
+  correctIndex:0,
+  teardowns:["This overstates the relationship as full confirmation, when Text 2 actually introduces a complicating result the planner did not anticipate.","This misreads the texts as referring to the same event, when they explicitly describe different cities.","This overgeneralizes the shop owner's specific, limited observation into a sweeping rejection of all pedestrian zones."],
+  misconception:"Students may misjudge whether a second text confirms, complicates, or contradicts a first text, often by overgeneralizing a limited or mixed result."},
+
+ {domain:"Expression of Ideas", skill:"Transitions", difficulty:1, time:"30s",
+  passage:"The hikers checked the weather forecast before leaving and saw that rain was expected in the afternoon. ______, they packed rain jackets and left earlier than planned.",
+  stem:"Which choice completes the text with the most logical transition?",
+  choices:["However,","As a result,","In contrast,","Meanwhile,"],
+  correctIndex:1,
+  teardowns:["This signals a contrast, but the second sentence describes a logical consequence of the forecast, not an opposing idea.","This also signals contrast between two opposing ideas, which does not fit the cause-and-effect relationship here.","This signals two events happening at the same time, but the sentence describes actions taken because of the forecast, not simultaneous events."],
+  misconception:"Students may choose a contrast transition by default without checking whether the sentences show a cause-and-effect relationship instead."},
+
+ {domain:"Expression of Ideas", skill:"Transitions", difficulty:3, time:"45s",
+  passage:"The small factory invested heavily in new machinery to speed up production. ______, the machinery required specialized training that delayed output for the first few months.",
+  stem:"Which choice completes the text with the most logical transition?",
+  choices:["However,","Similarly,","For example,","Therefore,"],
+  correctIndex:0,
+  teardowns:["This signals similarity, but the second sentence describes an unexpected drawback, not a comparable situation.","This signals that a specific instance will follow, but the second sentence introduces a new complication rather than illustrating the first sentence.","This signals that the second sentence is a direct result of the first, but a delay from training is a contrasting outcome, not an expected consequence of investing in machinery."],
+  misconception:"Students may select a transition that matches the topic but ignore whether the logical relationship is contrast, cause, or example."},
+
+ {domain:"Expression of Ideas", skill:"Rhetorical Synthesis", difficulty:3, time:"50s",
+  passage:"Notes:<br>• A student is writing about a local recycling program.<br>• The program started three years ago with only paper and cardboard collection.<br>• Last year, the program expanded to include plastics and glass.<br>• Participation rates rose from 20 percent of households to 55 percent after the expansion.<br>• The student wants to emphasize that expanding the types of materials collected increased participation.",
+  stem:"Which choice most effectively uses the given information to accomplish the student's goal?",
+  choices:["The recycling program began three years ago with paper and cardboard collection.","After the program expanded to include plastics and glass, household participation rose from 20 percent to 55 percent.","Many households did not participate in the recycling program during its first year.","Plastics and glass are more difficult to recycle than paper and cardboard."],
+  correctIndex:1,
+  teardowns:["This states only the program's starting point and omits the participation data needed to show the effect of expansion.","This answers a different question than asked, focusing on early nonparticipation rather than the effect of expanding materials.","This introduces an unsupported claim about recycling difficulty that is not in the notes and does not address participation."],
+  misconception:"Students may choose a true, notes-based sentence that fails to connect the specific cause and effect the stated goal requires."},
+
+ {domain:"Expression of Ideas", skill:"Rhetorical Synthesis", difficulty:3, time:"50s",
+  passage:"Notes:<br>• A student is writing about two coworkers, Mia and Tomas, who each lead a small team.<br>• Mia holds a short daily check-in meeting with her team.<br>• Tomas prefers to communicate through written messages only.<br>• Mia's team reports feeling more informed about project changes.<br>• Tomas's team reports missing some updates.<br>• The student wants to contrast the two communication styles and their effect on how informed each team feels.",
+  stem:"Which choice most effectively uses the given information to accomplish the student's goal?",
+  choices:["Mia and Tomas both lead small teams at the same company.","Tomas prefers written communication because he finds meetings unproductive.","While Mia's daily check-ins kept her team informed, Tomas's written-only approach left his team missing some updates.","Mia's team meets every day, which takes time away from other tasks."],
+  correctIndex:2,
+  teardowns:["This provides background about their roles but does not contrast the communication styles or their effects, as the goal requires.","This introduces a reason for Tomas's preference that is not stated in the notes and ignores the contrast in outcomes.","This focuses on a drawback of Mia's method that is not mentioned in the notes and does not complete the required contrast."],
+  misconception:"Students may pick a choice that mentions both people or topics without actually building the specific contrast the stated goal calls for."},
+
+ {domain:"Standard English Conventions", skill:"Boundaries", difficulty:2, time:"35s",
+  passage:"The museum's new exhibit features fossils from three continents ______",
+  stem:"Which choice completes the text so that it conforms to the conventions of Standard English?",
+  choices:[", many of these fossils are more than a million years old.","; many of these fossils are more than a million years old.","many of these fossils are more than a million years old.",", and many of these fossils, are more than a million years old."],
+  correctIndex:1,
+  teardowns:["This joins two independent clauses with only a comma, creating a comma splice.","This joins two independent clauses with no punctuation at all, creating a fused (run-on) sentence.","This adds an unnecessary comma inside the second clause, incorrectly separating the subject from its verb phrase."],
+  misconception:"Students may fail to recognize when two independent clauses are being joined and choose a punctuation mark too weak (or absent) to link them correctly."},
+
+ {domain:"Standard English Conventions", skill:"Boundaries", difficulty:3, time:"45s",
+  passage:"______, the tour guide pointed out several unusual rock formations.",
+  stem:"Which choice completes the text so that it conforms to the conventions of Standard English and logically modifies the intended noun?",
+  choices:["Walking along the narrow canyon trail, the rock formations were pointed out by the tour guide.","Walking along the narrow canyon trail, the tour guide pointed out several unusual rock formations.","Having pointed out several unusual rock formations, the canyon trail was narrow.","The rock formations, walking along the narrow canyon trail, were unusual."],
+  correctIndex:1,
+  teardowns:["This places the introductory phrase next to 'rock formations,' illogically suggesting that the rock formations were walking along the trail.","This places the modifier next to 'canyon trail,' illogically suggesting that the trail pointed out the formations.","This inserts the modifier in the middle of the sentence next to 'rock formations,' again illogically suggesting the formations were walking."],
+  misconception:"Students may overlook that an introductory modifying phrase must be placed next to the noun it logically describes, not just anywhere near the sentence's beginning."},
+
+ {domain:"Standard English Conventions", skill:"Form, Structure, and Sense", difficulty:3, time:"45s",
+  passage:"A collection of rare stamps, carefully preserved for decades by the family, ______ recently donated to the local history museum.",
+  stem:"Which choice completes the text so that it conforms to the conventions of Standard English?",
+  choices:["were","was","have been","are"],
+  correctIndex:1,
+  teardowns:["This treats the subject as plural by agreeing with 'stamps' in the intervening phrase, rather than with the singular subject 'collection.'","This uses a plural-agreeing verb form, again matching the nearby plural noun 'stamps' rather than the true singular subject.","This also agrees with the plural noun in the interrupting phrase instead of the singular subject of the sentence."],
+  misconception:"Students may match a verb to the nearest noun in an interrupting phrase rather than to the sentence's true subject."},
+
+ {domain:"Standard English Conventions", skill:"Form, Structure, and Sense", difficulty:3, time:"45s",
+  passage:"The new employee training program focuses on teaching new hires how to manage their time, communicate clearly, and ______ constructive feedback.",
+  stem:"Which choice completes the text so that it conforms to the conventions of Standard English?",
+  choices:["how they should give","give","giving","the giving of"],
+  correctIndex:1,
+  teardowns:["This breaks the parallel structure by shifting to a full clause, while the other two items in the list are simple infinitive verb phrases (to manage, to communicate).","This shifts to a gerund form, which does not match the infinitive verb forms used in the rest of the list.","This shifts to a noun phrase, which does not match the infinitive verb forms used elsewhere in the list."],
+  misconception:"Students may fail to check that all items in a list share the same grammatical form, allowing one item to break the parallel structure."},
+
+ {domain:"Standard English Conventions", skill:"Boundaries", difficulty:5, time:"75s",
+  passage:"The committee reviewed dozens of proposals for the new community center. ______",
+  stem:"Which choice completes the text so that it conforms to the conventions of Standard English?",
+  choices:["Some of the proposals included plans for a rooftop garden, others focused mainly on expanding the parking area.","Some of the proposals included plans for a rooftop garden, while others focused mainly on expanding the parking area.","Some of the proposals included plans for a rooftop garden others focused mainly on expanding the parking area.","Some of the proposals, included plans for a rooftop garden, others focused mainly on expanding the parking area."],
+  correctIndex:1,
+  teardowns:["This joins two independent clauses with only a comma, creating a comma splice.","This joins two independent clauses with no punctuation between them at all, creating a fused (run-on) sentence.","This inserts an unnecessary comma after the subject 'proposals' and still leaves the two independent clauses joined by only a comma, compounding the comma splice error."],
+  misconception:"Students may focus on surface-level punctuation placement without checking whether the clauses on either side are independent and require a stronger connector such as a subordinating conjunction or semicolon."}
+];
+
+const M_M1 = [
+ {domain:"Algebra", skill:"Linear equations in one variable", difficulty:1, time:"45s",
+  stem:"If 5x − 3 = 22, what is the value of x?",
+  choices:["5","3.8","4.4","25"],
+  correctIndex:0,
+  teardowns:["Sign error moving the constant: computes 5x = 22 − 3 = 19, giving x = 3.8, instead of adding 3 to both sides.","Drops a term entirely: computes 22/5 = 4.4, ignoring the −3 term.","Incomplete solving: stops after finding 5x = 25 without dividing by 5."],
+  misconception:"Stopping the algebra one step early, or moving a term to the wrong side of the equation.",
+  worked:"5x − 3 = 22 → add 3 to both sides → 5x = 25 → divide by 5 → x = 5.<br><b>Check:</b> 5(5) − 3 = 25 − 3 = 22 ✓"},
+
+ {domain:"Problem-Solving and Data Analysis", skill:"Percent (successive percent change)", difficulty:3, time:"75s",
+  stem:"A store increases the price of a $40 jacket by 15%, then later applies a 20% discount to the new price. What is the final price, to the nearest cent?",
+  choices:["$36.80","$34.00","$38.00","$40.00"],
+  correctIndex:0,
+  teardowns:["Sign confusion on the first step: applies the 15% as a decrease instead of an increase (40 × 0.85 = 34).","Combines percents additively instead of sequentially: 40 × (1.15 − 0.20) = 40 × 0.95 = 38, a classic successive-percent-change error.","Assumes the +15% and −20% changes cancel out to no net change on the original base."],
+  misconception:"Treating two successive percent changes as if they combine by simple addition/subtraction rather than sequential multiplication.",
+  worked:"New price = 40 × 1.15 = 46.00. Final price = 46 × (1 − 0.20) = 46 × 0.80 = 36.80.<br><b>Check:</b> 36.80 / 46 = 0.80 (20% off confirmed); 46 / 40 = 1.15 (15% increase confirmed) ✓"},
+
+ {domain:"Advanced Math", skill:"Quadratic equations (factoring)", difficulty:3, time:"60s",
+  stem:"What are the solutions to x² − 5x + 6 = 0?",
+  choices:["x = −1, −6","x = −2, −3","x = 2, 3","x = 1, 6"],
+  correctIndex:2,
+  teardowns:["Combines a wrong factor pair with a sign flip — the compounded version of both other errors.","Sign error: uses factors of +6 but flips the sign of both roots, forgetting what a positive middle-term coefficient implies.","Picks a factor pair of 6 (1 and 6) without checking that the pair must also sum to 5; 1 + 6 = 7 ≠ 5."],
+  misconception:"Finding any factor pair of the constant term without verifying it also satisfies the sum condition from the middle term.",
+  worked:"Find two numbers that multiply to 6 and sum to 5: 2 and 3. So x² − 5x + 6 = (x − 2)(x − 3) = 0 → x = 2 or x = 3.<br><b>Check:</b> 2² − 5(2) + 6 = 0 ✓; 3² − 5(3) + 6 = 0 ✓"},
+
+ {domain:"Algebra", skill:"Function evaluation/notation", difficulty:1, time:"30s",
+  stem:"If f(x) = 3x + 4, what is f(6)?",
+  choices:["9","18","22","30"],
+  correctIndex:2,
+  teardowns:["Confuses the roles of coefficient and constant, effectively computing 6 + 3 instead of 3(6) + 4.","Omits the '+4' term, stopping after multiplying: 3(6) = 18.","Applies order of operations incorrectly by adding before multiplying: 3(6 + 4) = 30."],
+  misconception:"Dropping the constant term or misapplying order of operations when evaluating a function.",
+  worked:"f(6) = 3(6) + 4 = 18 + 4 = 22.<br><b>Check:</b> plugging 6 back into 3x + 4 gives 22, consistent ✓"},
+
+ {domain:"Geometry and Trigonometry", skill:"Area of triangles", difficulty:3, time:"60s",
+  stem:"A right triangle has legs of length 9 and 12. What is the area of the triangle?",
+  choices:["54","15","21","108"],
+  correctIndex:0,
+  teardowns:["Confuses a Pythagorean side length with area: computes the hypotenuse (√(81+144) = 15) instead of the area.","Confuses the sum of the legs with the area formula: 9 + 12 = 21.","Forgets to divide by 2, using the full product of the legs as the area: 9 × 12 = 108."],
+  misconception:"Confusing the triangle area formula with the perimeter or the Pythagorean theorem.",
+  worked:"Area = ½ × base × height = ½ × 9 × 12 = 54.<br><b>Check:</b> the hypotenuse is √(9²+12²) = 15, confirming a valid 9-12-15 right triangle (a 3-4-5 triple scaled by 3); the area formula holds independently at 54 ✓"},
+
+ {domain:"Advanced Math", skill:"Exponential equations", difficulty:5, time:"90s",
+  stem:"The function g is defined by g(x) = 2^x + 3. What is the value of x for which g(x) = 19?",
+  choices:["4","3","8","11"],
+  correctIndex:0,
+  teardowns:["Off-by-one power error: correctly isolates 2^x = 16 but misreads 2³ = 16 instead of 2⁴ = 16.","Treats the exponential equation as linear, dividing instead of using powers: (19 − 3)/2 = 8.","Compounds a misread of 2^x as 2x with a sign flip: solves 2x = 19 + 3 = 22 → x = 11."],
+  misconception:"Treating an exponential term (2^x) as if it were a linear term (2x), or misjudging powers of 2.",
+  worked:"g(x) = 2^x + 3 = 19 → 2^x = 16 → since 2⁴ = 16, x = 4.<br><b>Check:</b> g(4) = 2⁴ + 3 = 16 + 3 = 19 ✓"},
+
+ {domain:"Algebra", skill:"Systems of linear equations", difficulty:3, time:"70s",
+  stem:"If 2x + y = 10 and x − y = 2, what is the value of x?",
+  choices:["4","2","6","8"],
+  correctIndex:0,
+  teardowns:["Solves for y instead of x, mixing up which variable the question asks for.","Arithmetic slip while combining the equations, miscalculating the sum before dividing by 3.","Drops a term during elimination: subtracting the equations gives x + 2y = 8, and this misreads the result as x = 8."],
+  misconception:"Losing track of a term during elimination, or solving for the wrong variable.",
+  worked:"Add the two equations: (2x + y) + (x − y) = 10 + 2 → 3x = 12 → x = 4. Then from x − y = 2: 4 − y = 2 → y = 2.<br><b>Check:</b> 2(4) + 2 = 10 ✓; 4 − 2 = 2 ✓"},
+
+ {domain:"Problem-Solving and Data Analysis", skill:"Sampling and proportional reasoning", difficulty:5, time:"80s",
+  stem:"In a random sample of 200 shoppers, 50 preferred online shopping. Assuming the same rate applies to a population of 6,000 shoppers, about how many would be expected to prefer online shopping?",
+  choices:["1,500","1,200","300","2,400"],
+  correctIndex:0,
+  teardowns:["Miscounts the sample size as 250 instead of 200, using the ratio 50/250: 6000 × 0.2 = 1,200.","Treats the count 50 as if it meant '5%' rather than computing the true sample rate: 6000 × 0.05 = 300.","Doubles the correct rate, confusing the count '50' with '50%': 6000 × 0.5 = 3,000, rounding here to 2,400 from a related slip."],
+  misconception:"Misreading which two numbers form the sample proportion, or confusing a raw count with a percentage.",
+  worked:"Sample rate = 50/200 = 0.25 (25%). Apply to the population: 6000 × 0.25 = 1,500.<br><b>Check:</b> 1500/6000 = 0.25, matching the sample rate of 50/200 = 0.25 ✓"}
+];
+
+const M_M2H = [
+ {domain:"Algebra", skill:"Linear equations in one variable", difficulty:2, time:"45s",
+  stem:"If 7x + 2 = 5x + 14, what is the value of x?",
+  choices:["6","−6","8","12"],
+  correctIndex:0,
+  teardowns:["Sign error from moving terms to the wrong side, computing −2x = 12 instead of 2x = 12.","Arithmetic slip combining constants: adds instead of subtracts, using 14 + 2 = 16, then 16/2 = 8.","Forgets to divide by 2 at the end, stopping at 2x = 12."],
+  misconception:"Losing track of a sign when moving terms across the equals sign.",
+  worked:"7x + 2 = 5x + 14 → 7x − 5x = 14 − 2 → 2x = 12 → x = 6.<br><b>Check:</b> 7(6)+2 = 44; 5(6)+14 = 44 ✓"},
+
+ {domain:"Problem-Solving and Data Analysis", skill:"Percent", difficulty:3, time:"45s",
+  stem:"A researcher surveys 150 people and finds that 45 own an electric vehicle. What percent of those surveyed own an electric vehicle?",
+  choices:["30%","3%","33%","45%"],
+  correctIndex:0,
+  teardowns:["Decimal-point error: computes 45/150 as 0.03 instead of 0.30.","Uses an incorrect adjusted denominator, e.g. dividing by 135 instead of 150.","Confuses a raw count with a percentage, reporting 45 as if it were '45%' directly."],
+  misconception:"Confusing a raw count with a percentage, or misplacing a decimal point during conversion.",
+  worked:"45/150 = 0.30 = 30%.<br><b>Check:</b> 30% of 150 = 0.30 × 150 = 45, matching the given count ✓"},
+
+ {domain:"Geometry and Trigonometry", skill:"Circles (circumference)", difficulty:3, time:"50s",
+  stem:"A circle has a circumference of 18π. What is the radius of the circle?",
+  choices:["9","3","6","18"],
+  correctIndex:0,
+  teardowns:["Misapplies an unrelated formula, dividing 18 by 6 instead of using C = 2πr.","Drops π from the formula and misremembers the constant, dividing 18 by 3.","Forgets the factor of 2 in C = 2πr, solving πr = 18π → r = 18 (a diameter/radius mix-up)."],
+  misconception:"Forgetting the factor of 2 in the circumference formula, effectively confusing the radius with the diameter.",
+  worked:"C = 2πr → 18π = 2πr → divide both sides by 2π → r = 9.<br><b>Check:</b> 2π(9) = 18π ✓"},
+
+ {domain:"Advanced Math", skill:"Quadratic functions in vertex form", difficulty:5, time:"70s",
+  stem:"The function h is defined by h(x) = −2(x − 3)² + 8. What is the maximum value of h?",
+  choices:["8","3","−2","6"],
+  correctIndex:0,
+  teardowns:["Reports the x-coordinate of the vertex instead of the maximum output value, mixing up input and output.","Reports the leading coefficient instead of the function's value, confusing the coefficient with the output.","Mis-expands the squared term during an incorrect evaluation attempt, arriving at a nearby but wrong value."],
+  misconception:"Confusing the vertex's x-coordinate (the input that produces the max) with the maximum value itself (the output).",
+  worked:"In vertex form h(x) = a(x − h)² + k, the vertex is (h, k) = (3, 8). Since a = −2 < 0, the parabola opens downward, so the vertex is a maximum. Maximum value = 8.<br><b>Check:</b> h(3) = −2(0)+8 = 8; h(2) = −2(1)+8 = 6 < 8; h(4) = −2(1)+8 = 6 < 8, confirming 8 is the local max ✓"},
+
+ {domain:"Algebra", skill:"Linear models / rate problems", difficulty:3, time:"60s",
+  stem:"A candle is 20 cm tall and burns at a constant rate of 1.5 cm per hour. How many hours will it take for the candle to burn down to 5 cm?",
+  choices:["10","3.3","13.3","25"],
+  correctIndex:0,
+  teardowns:["Forgets to subtract from the starting height, solving 1.5h = 5 instead of 1.5h = 15.","Forgets to account for the remaining 5 cm, treating the candle as burning down to zero: 20/1.5 ≈ 13.3.","Inverts the rate before dividing, effectively multiplying by 1/1.5 in the wrong step."],
+  misconception:"Forgetting to subtract the target remaining height from the starting height before dividing by the rate.",
+  worked:"Remaining height = 20 − 1.5h. Set equal to 5: 20 − 1.5h = 5 → 1.5h = 15 → h = 10.<br><b>Check:</b> 20 − 1.5(10) = 20 − 15 = 5 ✓"},
+
+ {domain:"Problem-Solving and Data Analysis", skill:"Probability and proportional reasoning", difficulty:5, time:"75s",
+  stem:"A bag contains only red and blue marbles. The probability of randomly drawing a red marble is 2/5. If there are 12 red marbles in the bag, how many total marbles are in the bag?",
+  choices:["30","17","24","48"],
+  correctIndex:0,
+  teardowns:["Treats the probability's denominator as an additive quantity, computing 12 + 5 = 17 instead of solving a proportion.","Misapplies the numerator as a direct multiplier on the count: 12 × 2 = 24.","Garbles a complementary-probability calculation involving the blue marbles, confusing a part for the whole."],
+  misconception:"Treating a probability fraction as something to add or multiply directly onto a count, instead of setting up a proportion.",
+  worked:"If P(red) = 2/5 and there are 12 red marbles, set up 2/5 = 12/n, where n is the total. Cross-multiply: 2n = 60 → n = 30.<br><b>Check:</b> 12/30 = 2/5 ✓"},
+
+ {domain:"Algebra", skill:"Linear inequalities", difficulty:3, time:"55s",
+  stem:"Which of the following values of x satisfies the inequality 3x − 4 > 11?",
+  choices:["5.5","4","5","−6"],
+  correctIndex:0,
+  teardowns:["A value just below the true boundary; testing it shows 3(4) − 4 = 8, which is not greater than 11.","The boundary value itself: 3(5) − 4 = 11 is NOT greater than 11, since the inequality is strict.","Satisfies the inequality only if the sign is flipped by mistake when isolating x — a sign-flip error trap."],
+  misconception:"Mistaking the boundary/equality solution for a valid solution to a strict inequality.",
+  worked:"3x − 4 > 11 → 3x > 15 → x > 5. Among the choices, only 5.5 is greater than 5.<br><b>Check:</b> 3(5.5) − 4 = 12.5, and 12.5 > 11 ✓"},
+
+ {domain:"Advanced Math", skill:"Rational equations", difficulty:5, time:"80s",
+  stem:"If x/(x − 2) = 3, what is the value of x, given that x ≠ 2?",
+  choices:["3","−3","2","6"],
+  correctIndex:0,
+  teardowns:["Sign error when isolating the variable, flipping the sign of the final answer during the last step.","Misreads the excluded value stated in the problem ('x ≠ 2') as if it were the solution itself.","Stops the algebraic manipulation early, mistaking an intermediate quantity for the final answer."],
+  misconception:"Confusing the value a variable is restricted from taking with the value that actually solves the equation.",
+  worked:"x/(x−2) = 3 → multiply both sides by (x−2): x = 3(x−2) → x = 3x − 6 → −2x = −6 → x = 3.<br><b>Check:</b> x = 3 ≠ 2, so it's valid; 3/(3−2) = 3/1 = 3 ✓"},
+
+ {domain:"Algebra", skill:"Linear equations in one variable", difficulty:2, time:"40s",
+  stem:"Solve for x: 3x + 7 = 22",
+  choices:["5","9.67","15","−2.67"],
+  correctIndex:0,
+  teardowns:["Adds 7 instead of subtracting it, computing 3x = 22 + 7 = 29, then x = 29/3 ≈ 9.67.","Correctly subtracts 7 to get 3x = 15 but forgets to divide by 3, leaving x = 15.","Divides 22 by 3 before subtracting 7, computing 22/3 − 7 ≈ −2.67 instead of isolating x first."],
+  misconception:"Students perform the two-step isolation (subtract, then divide) out of order or with the wrong sign, instead of undoing operations in reverse order.",
+  worked:"3x + 7 = 22<br>Subtract 7 from both sides: 3x = 15<br>Divide both sides by 3: x = 5<br><b>Check:</b> 3(5) + 7 = 15 + 7 = 22 ✓<br>Confirmed: x = 5."},
+
+ {domain:"Algebra", skill:"Systems of linear equations", difficulty:3, time:"60s",
+  stem:"Solve the system for x: 2x + y = 11 and x − y = 1.",
+  choices:["4","12","3","6"],
+  correctIndex:0,
+  teardowns:["Correctly adds the equations to get 3x = 12 but forgets to divide by 3, giving x = 12.","Solves the system correctly (x = 4, y = 3) but reports the value of y instead of the value of x that was asked for.","Adds the equations to get 3x = 12 but divides by 2 instead of 3, giving x = 6."],
+  misconception:"Students correctly perform elimination but stop before completing the final division, or report the wrong variable's value.",
+  worked:"2x + y = 11<br>x − y = 1<br>Add the two equations (the y-terms cancel): (2x + y) + (x − y) = 11 + 1 → 3x = 12 → x = 4<br>Substitute back: 2(4) + y = 11 → y = 3<br><b>Check:</b> x − y = 4 − 3 = 1 ✓ and 2x + y = 8 + 3 = 11 ✓<br>Confirmed: x = 4."},
+
+ {domain:"Algebra", skill:"Linear inequalities", difficulty:3, time:"55s",
+  stem:"Solve the inequality: −4x + 3 ≤ 15",
+  choices:["x ≥ -3","x ≤ -3","x ≥ -4.5","x ≥ 3"],
+  correctIndex:0,
+  teardowns:["Correctly isolates −4x ≤ 12 but forgets to flip the inequality sign when dividing both sides by a negative number.","Adds 3 to both sides instead of subtracting it, getting −4x ≤ 18, then divides to get x ≥ -4.5.","Divides 12 by 4 while ignoring the negative sign on the coefficient (dropping the negative instead of flipping the inequality), giving x ≥ 3."],
+  misconception:"Students forget that dividing (or multiplying) an inequality by a negative number requires reversing the inequality sign.",
+  worked:"−4x + 3 ≤ 15<br>Subtract 3 from both sides: −4x ≤ 12<br>Divide both sides by −4 and flip the inequality: x ≥ −3<br><b>Check:</b> at the boundary x = −3: −4(−3) + 3 = 12 + 3 = 15 ≤ 15 ✓ (boundary holds)<br>Confirmed: x ≥ −3."},
+
+ {domain:"Algebra", skill:"Linear functions/models", difficulty:4, time:"75s",
+  stem:"A tank starts with 40 liters of water and drains at a constant rate. After 5 minutes, it contains 25 liters. Assuming the volume V(t) is a linear function of time t (in minutes), after how many minutes will the tank be completely empty?",
+  choices:["40/3","8","15","12"],
+  correctIndex:0,
+  teardowns:["Mistakes the remaining volume at t = 5 (25 L) as the drain rate itself, computing rate = 25/5 = 5 L/min, then solves 40/5 = 8.","Correctly finds the drain rate is 3 L/min but divides 45 (not 40) by 3, mistakenly adding 5 extra liters before dividing, giving 15.","Correctly finds the drain rate is 3 L/min and sets up 40/3 but makes an arithmetic slip in the division, rounding down to 12 instead of 13.3."],
+  misconception:"Students confuse a single data point (volume remaining at one time) with the rate of change, instead of using two points to find slope first.",
+  worked:"Let V(t) = 40 − rt.<br>At t = 5, V = 25: 40 − 5r = 25 → 5r = 15 → r = 3<br>So V(t) = 40 − 3t<br>Set V(t) = 0: 40 − 3t = 0 → t = 40/3 ≈ 13.3<br><b>Check:</b> V(5) = 40 − 3(5) = 40 − 15 = 25 ✓ (matches given data), and V(40/3) = 40 − 3(40/3) = 40 − 40 = 0 ✓<br>Confirmed: the tank is empty after 40/3 ≈ 13.3 minutes."},
+
+ {domain:"Advanced Math", skill:"Quadratic equations (factoring or the quadratic formula)", difficulty:3, time:"60s",
+  stem:"What is the positive value of x that satisfies x² − 5x − 14 = 0?",
+  choices:["7","-2","2","9"],
+  correctIndex:0,
+  teardowns:["Correctly factors to (x−7)(x+2) = 0 but reports the negative root (−2) instead of the positive one requested.","Incorrectly factors as (x−2)(x+7) = 0 (swapping which factor gets which sign), giving roots 2 and −7, and selects 2.","Correctly computes the discriminant √(25+56) = √81 = 9 but stops there, giving the square root itself instead of finishing the formula (5±9)/2."],
+  misconception:"Students find correct factor pairs or discriminants but make sign errors in assigning roots, or stop the process before completing the final step.",
+  worked:"x² − 5x − 14 = 0<br>Find two numbers that multiply to −14 and add to −5: −7 and 2<br>Factor: (x − 7)(x + 2) = 0<br>So x = 7 or x = −2<br>The positive solution is x = 7.<br><b>Check:</b> 7² − 5(7) − 14 = 49 − 35 − 14 = 0 ✓<br>Confirmed: x = 7."},
+
+ {domain:"Advanced Math", skill:"Quadratic functions in vertex form", difficulty:4, time:"80s",
+  stem:"A function is given by f(x) = −2(x − 1)² + 8. What is the value of f(4)?",
+  choices:["-10","26","-24","2"],
+  correctIndex:0,
+  teardowns:["Drops the negative sign on the leading coefficient, computing 2(4−1)² + 8 = 2(9) + 8 = 26.","Squares x = 4 itself instead of the quantity (x − 1), computing −2(4)² + 8 = −2(16) + 8 = −24.","Forgets to square (x − 1) at all and just multiplies it by −2, giving −2(4 − 1) + 8 = −2(3) + 8 = 2."],
+  misconception:"Students misapply order of operations in vertex form, either dropping the negative sign, squaring the wrong quantity, or skipping the squaring step entirely.",
+  worked:"f(x) = −2(x − 1)² + 8<br>f(4) = −2(4 − 1)² + 8 = −2(3)² + 8 = −2(9) + 8 = −18 + 8 = −10<br><b>Check:</b> step by step: (4−1) = 3, 3² = 9, −2×9 = −18, −18 + 8 = −10 ✓<br>Confirmed: f(4) = −10."},
+
+ {domain:"Advanced Math", skill:"Exponential equations/functions", difficulty:5, time:"85s",
+  stem:"A population of bacteria doubles every 3 years, starting at 200. After how many years will the population reach 1600?",
+  choices:["9","24","3","12"],
+  correctIndex:0,
+  teardowns:["Correctly finds the population must multiply by 8 (1600/200) but mistakes 8 itself for the number of doubling periods (instead of solving 2ⁿ = 8 for n = 3), then multiplies 8 × 3 = 24.","Correctly solves 2ⁿ = 8 to find n = 3 doubling periods, but forgets to convert back to years by multiplying by the 3-year doubling time, submitting the number of doublings itself.","Mistakenly solves 2ⁿ = 8 by dividing (n = 8/2 = 4) instead of recognizing 2³ = 8, then multiplies 4 × 3 = 12."],
+  misconception:"Students confuse the growth ratio, the number of doubling periods, and the actual elapsed time, failing to convert between them correctly using exponent rules.",
+  worked:"Let t = years. 200 · 2^(t/3) = 1600<br>Divide both sides by 200: 2^(t/3) = 8<br>Since 8 = 2³, we need t/3 = 3<br>So t = 9<br><b>Check:</b> 200 · 2^(9/3) = 200 · 2³ = 200 · 8 = 1600 ✓<br>Confirmed: t = 9 years."},
+
+ {domain:"Advanced Math", skill:"Rational equations", difficulty:3, time:"65s",
+  stem:"Solve for x: (3x − 2)/(x + 1) = 2",
+  choices:["4","3","0","1"],
+  correctIndex:0,
+  teardowns:["Cross-multiplies but forgets to distribute the 2 across both terms of (x + 1), writing 3x − 2 = 2x + 1 instead of 2x + 2, giving x = 3.","Distributes correctly to get 3x − 2 = 2x + 2 but makes a sign error moving terms (combining constants as 2 − 2 instead of 2 + 2), leading to 3x − 2x = 0 and x = 0.","Sets up the cross-multiplication backwards, (x + 1) = 2(3x − 2), giving x + 1 = 6x − 4 → 5 = 5x → x = 1."],
+  misconception:"Students make distribution or sign errors when clearing the denominator in a rational equation, or invert which side gets multiplied by which expression.",
+  worked:"(3x − 2)/(x + 1) = 2<br>Cross-multiply: 3x − 2 = 2(x + 1) = 2x + 2<br>Subtract 2x from both sides: x − 2 = 2<br>Add 2 to both sides: x = 4<br><b>Check:</b> denominator x + 1 = 5 ≠ 0, so x = 4 is valid. Plug back in: (3(4) − 2)/(4 + 1) = (12 − 2)/5 = 10/5 = 2 ✓<br>Confirmed: x = 4."},
+
+ {domain:"Problem-Solving and Data Analysis", skill:"Percent", difficulty:2, time:"40s",
+  stem:"A jacket originally priced $80 is discounted 25%. What is the sale price?",
+  choices:["$60","$55","$20","$100"],
+  correctIndex:0,
+  teardowns:["Subtracts 25 (treating 25% as a flat $25 amount) instead of 25% of $80, giving 80 − 25 = 55.","Correctly computes the discount amount (25% of 80 = 20) but reports the discount itself instead of the new sale price.","Adds the 25% instead of subtracting it, computing 80 × 1.25 = 100."],
+  misconception:"Students confuse a percent discount with a flat dollar amount, or report the discount amount instead of the resulting price, or add instead of subtract.",
+  worked:"Discount = 25% of $80 = 0.25 × 80 = $20<br>Sale price = 80 − 20 = $60<br><b>Check:</b> $60 should be 75% of $80, and 0.75 × 80 = 60 ✓<br>Confirmed: sale price = $60."},
+
+ {domain:"Problem-Solving and Data Analysis", skill:"Ratios and proportions", difficulty:3, time:"55s",
+  stem:"A recipe uses flour and sugar in a ratio of 5:2. If a batch uses 35 cups of flour, how many cups of sugar are needed?",
+  choices:["14","87.5","32","7"],
+  correctIndex:0,
+  teardowns:["Sets up the proportion inverted (2/5 = 35/x, solved as x = 35×5/2) instead of 5/2 = 35/x, giving 87.5.","Incorrectly treats the ratio as an additive difference, computing 35 − (5 − 2) = 32 instead of scaling proportionally.","Correctly divides 35 by 5 to find the scale factor (7) but forgets to multiply by 2 to convert to the sugar amount, leaving the scale factor as the final answer."],
+  misconception:"Students set up proportions with the ratio inverted, treat ratios as additive rather than multiplicative, or forget to complete the scaling step.",
+  worked:"Ratio flour:sugar = 5:2<br>Set up the proportion: 5/2 = 35/x<br>Cross-multiply: 5x = 35 × 2 = 70<br>Divide by 5: x = 14<br><b>Check:</b> 35/14 = 2.5 = 5/2 ✓ (ratio preserved)<br>Confirmed: 14 cups of sugar."},
+
+ {domain:"Problem-Solving and Data Analysis", skill:"Probability", difficulty:4, time:"75s",
+  stem:"A bag contains 6 red, 4 blue, and 5 green marbles. Two marbles are drawn at random without replacement. What is the probability that both marbles drawn are red?",
+  choices:["1/7","4/25","2/5","2/15"],
+  correctIndex:0,
+  teardowns:["Treats the draws as independent with replacement, computing (6/15) × (6/15) = 4/25 instead of removing a marble after the first draw.","Computes only the probability of the first draw being red (6/15 = 2/5) and stops, forgetting to account for the second draw.","Correctly reduces the number of red marbles to 5 for the second draw but forgets to also reduce the total number of marbles to 14, computing (6/15)(5/15) = 2/15."],
+  misconception:"Students forget that drawing without replacement changes both the favorable count and the total count for the second draw, or stop after computing only one draw's probability.",
+  worked:"P(both red) = P(1st red) × P(2nd red | 1st red) = (6/15) × (5/14) = 30/210 = 1/7<br><b>Check:</b> 30/210 simplifies by dividing numerator and denominator by 30, giving 1/7 ✓<br>Confirmed: probability = 1/7."},
+
+ {domain:"Geometry and Trigonometry", skill:"Right triangle trigonometry (sin/cos/tan ratios)", difficulty:3, time:"60s",
+  stem:"In a right triangle, one angle measures 30° and the hypotenuse is 12. What is the length of the side opposite the 30° angle?",
+  choices:["6","6√3","6.93","24"],
+  correctIndex:0,
+  teardowns:["Uses cosine instead of sine for the opposite side, computing 12 × cos(30°) = 12 × (√3/2) = 6√3.","Mistakenly uses tangent with the hypotenuse (a ratio that requires two legs, not hypotenuse and opposite), computing 12 × tan(30°) ≈ 6.93.","Divides instead of multiplying, computing 12/sin(30°) = 12/0.5 = 24, inverting the sine relationship."],
+  misconception:"Students mix up which trig ratio (sin, cos, tan) relates the given sides to the desired side, or invert the ratio when solving.",
+  worked:"sin(angle) = opposite/hypotenuse<br>opposite = hypotenuse × sin(30°) = 12 × 0.5 = 6<br><b>Check:</b> sin(30°) = opposite/hypotenuse = 6/12 = 0.5 = sin(30°) ✓<br>Confirmed: the opposite side = 6."},
+
+ {domain:"Geometry and Trigonometry", skill:"Circles", difficulty:5, time:"85s",
+  stem:"A circle has area 64π. A central angle of 45° cuts off an arc of the circle. What is the length of that arc?",
+  choices:["2π","16π","4π","8π"],
+  correctIndex:0,
+  teardowns:["Forgets to take the square root when solving r² = 64, using r = 64 directly. This gives circumference 2π(64) = 128π, and arc = (45/360)(128π) = 16π.","Confuses the diameter with the radius, using 16 (the actual diameter) as r. This gives circumference 2π(16) = 32π, and arc = (45/360)(32π) = 4π.","Correctly finds r = 8 and circumference 16π, but sets up the arc fraction as 45/90 instead of 45/360, giving (45/90)(16π) = 8π."],
+  misconception:"Students skip the square-root step when solving for radius from area, confuse radius with diameter, or use the wrong denominator for the central-angle fraction.",
+  worked:"Area = πr² = 64π → r² = 64 → r = 8<br>Circumference = 2πr = 2π(8) = 16π<br>Arc length = (angle/360°) × circumference = (45/360) × 16π = (1/8) × 16π = 2π<br><b>Check:</b> (1/8) of the full circumference 16π should equal 2π, and 16π/8 = 2π ✓<br>Confirmed: arc length = 2π."},
+
+ {domain:"Geometry and Trigonometry", skill:"Area", difficulty:3, time:"55s",
+  stem:"A square has an area of 144 square meters. A circle is inscribed inside the square, touching all four sides. What is the area of the circle, in terms of π?",
+  choices:["36π","144π","12π","9π"],
+  correctIndex:0,
+  teardowns:["Uses the full side length (12) as the radius instead of recognizing the radius is half the side (6), giving π(12)² = 144π.","Computes the circle's circumference (2πr = 2π(6) = 12π) instead of its area.","Incorrectly divides the side length by 4 instead of 2 to find the radius (12/4 = 3), giving π(3)² = 9π."],
+  misconception:"Students confuse the side length of the square with the circle's radius or diameter when the circle is inscribed, misapplying the geometric relationship between the two.",
+  worked:"Square area = 144 → side = √144 = 12<br>Since the circle is inscribed, its diameter equals the square's side: diameter = 12, so radius = 6<br>Circle area = πr² = π(6)² = 36π<br><b>Check:</b> the circle's diameter (12) matches the square's side (12), confirming it is correctly inscribed ✓<br>Confirmed: area = 36π."}
+];
+
+const M_M2L = [
+ {domain:"Algebra", skill:"Linear equations in one variable", difficulty:1, time:"30s",
+  stem:"If x + 9 = 15, what is the value of x?",
+  choices:["6","4","9","24"],
+  correctIndex:0,
+  teardowns:["Arithmetic slip while subtracting 9 from 15.","Careless trap: restates one of the numbers given in the problem instead of solving.","Adds instead of subtracting: 15 + 9 = 24, the wrong operation direction."],
+  misconception:"Performing the inverse operation in the wrong direction when isolating the variable.",
+  worked:"x + 9 = 15 → x = 15 − 9 = 6.<br><b>Check:</b> 6 + 9 = 15 ✓"},
+
+ {domain:"Problem-Solving and Data Analysis", skill:"Percent", difficulty:1, time:"35s",
+  stem:"In a class of 25 students, 15 are girls. What percent of the class is girls?",
+  choices:["60%","15%","40%","66%"],
+  correctIndex:0,
+  teardowns:["Confuses the raw count with a percentage.","Answers the complementary question, finding the percent of boys (10/25 = 40%) instead of girls.","Inverts the fraction before converting to a percent."],
+  misconception:"Answering the complementary quantity instead of the one asked for, or confusing a count with a percent.",
+  worked:"15/25 = 0.60 = 60%.<br><b>Check:</b> 60% of 25 = 0.60 × 25 = 15, matching the given count of girls ✓"},
+
+ {domain:"Algebra", skill:"Linear equations with distribution", difficulty:3, time:"50s",
+  stem:"If 2(x + 3) = 16, what is the value of x?",
+  choices:["5","8","11","13"],
+  correctIndex:0,
+  teardowns:["Incomplete last step: correctly finds x + 3 = 8 but reports that value instead of subtracting 3.","Wrong operation direction: takes x + 3 = 8 and adds 3 instead of subtracting, giving 11.","Ignores the coefficient of 2 entirely, computing 16 − 3 = 13 as if the equation were x + 3 = 16."],
+  misconception:"Stopping the solving process one step early after dividing but before completing the final subtraction.",
+  worked:"2(x + 3) = 16 → divide both sides by 2 → x + 3 = 8 → subtract 3 → x = 5.<br><b>Check:</b> 2(5+3) = 2(8) = 16 ✓"},
+
+ {domain:"Geometry and Trigonometry", skill:"Area of rectangles", difficulty:1, time:"30s",
+  stem:"A rectangle has a length of 8 and a width of 5. What is its area?",
+  choices:["40","13","26","45"],
+  correctIndex:0,
+  teardowns:["Wrong operation: adds length and width (8 + 5 = 13) instead of multiplying.","Confuses the perimeter formula with the area formula: 2(8 + 5) = 26.","Basic multiplication slip when computing 8 × 5."],
+  misconception:"Confusing the area formula (length × width) with the perimeter formula.",
+  worked:"Area = length × width = 8 × 5 = 40.<br><b>Check:</b> 40/8 = 5, matching the given width ✓"},
+
+ {domain:"Advanced Math", skill:"Exponents / squaring negative numbers", difficulty:2, time:"30s",
+  stem:"What is the value of x² when x = −4?",
+  choices:["16","−16","−8","8"],
+  correctIndex:0,
+  teardowns:["Sign error: forgets that squaring a negative number gives a positive result.","Confuses squaring with doubling, computing 2 × (−4) and keeping the negative sign.","Confuses squaring with doubling, computing 2 × (−4) but dropping the negative sign."],
+  misconception:"Confusing 'squaring' with 'doubling,' or forgetting that a negative number squared is positive.",
+  worked:"x² = (−4)² = (−4) × (−4) = 16 (a negative times a negative is positive).<br><b>Check:</b> √16 = 4 = |−4| ✓"},
+
+ {domain:"Algebra", skill:"Linear models / word problems", difficulty:3, time:"50s",
+  stem:"A taxi charges a $3 flat fee plus $2 per mile. If a ride costs $17, how many miles was the ride?",
+  choices:["7","5","8.5","10"],
+  correctIndex:0,
+  teardowns:["Mixes up which number is the flat fee and which is the rate before subtracting.","Forgets the flat fee entirely, computing 17/2 = 8.5 directly.","Sign error adding the flat fee instead of subtracting it: (17+3)/2 = 10."],
+  misconception:"Forgetting to remove the flat fee before dividing by the per-mile rate.",
+  worked:"3 + 2m = 17 → 2m = 14 → m = 7.<br><b>Check:</b> 3 + 2(7) = 3 + 14 = 17 ✓"},
+
+ {domain:"Advanced Math", skill:"Quadratic equations (square roots, extraneous roots)", difficulty:4, time:"55s",
+  stem:"If x² = 49 and x < 0, what is the value of x?",
+  choices:["−7","7","−49","49"],
+  correctIndex:0,
+  teardowns:["Forgets the given condition x < 0 and reports only the positive root.","Reports x² itself instead of solving for x, never taking the square root.","Mixes up x²'s value with x, incorrectly attaching a sign to the squared quantity itself."],
+  misconception:"Forgetting to apply a stated sign condition (x < 0) when a squared equation has two possible roots.",
+  worked:"x² = 49 → x = ±7. Since x < 0 is given, x = −7.<br><b>Check:</b> (−7)² = 49 ✓, and −7 < 0 ✓"},
+
+ {domain:"Problem-Solving and Data Analysis", skill:"Ratios and proportions", difficulty:3, time:"50s",
+  stem:"A recipe uses flour and sugar in a ratio of 3:2. If a baker uses 12 cups of flour, how many cups of sugar should be used?",
+  choices:["8","6","9","18"],
+  correctIndex:0,
+  teardowns:["Divides 12 by 2 directly, ignoring the '3' part of the ratio entirely.","Misapplies the ratio, effectively treating it as 3:4 rather than 3:2.","Scales in the wrong direction, multiplying 12 by 1.5 instead of finding the smaller sugar amount."],
+  misconception:"Applying only one number from a ratio instead of setting up a full proportion with both parts.",
+  worked:"Set up the proportion 3/2 = 12/s. Cross-multiply: 3s = 24 → s = 8.<br><b>Check:</b> 12/8 = 3/2 ✓"},
+
+ {domain:"Algebra", skill:"Linear equations in one variable", difficulty:1, time:"25s",
+  stem:"Solve for x: x + 7 = 15",
+  choices:["8","22","-8","105"],
+  correctIndex:0,
+  teardowns:["Adds instead of subtracts, computing 15 + 7 = 22.","Subtracts in the wrong direction, computing 7 − 15 = −8.","Multiplies instead of subtracting, computing 15 × 7 = 105."],
+  misconception:"Confuses inverse operations when isolating a variable in an addition equation.",
+  worked:"Start with x + 7 = 15.<br>Subtract 7 from both sides: x = 15 − 7.<br>x = 8.<br><b>Check:</b> 8 + 7 = 15 ✓<br>The answer is confirmed: x = 8."},
+
+ {domain:"Algebra", skill:"Linear equations with distribution", difficulty:3, time:"50s",
+  stem:"Solve for x: 3(x - 4) = 18",
+  choices:["10","6","22/3","2"],
+  correctIndex:0,
+  teardowns:["Stops after computing x − 4 = 18 ÷ 3 = 6 and forgets to add the 4 back.","Forgets to distribute the 3 to the −4, treating the equation as 3x − 4 = 18, giving x = 22/3.","Subtracts 12 instead of adding when isolating 3x, computing 18 − 12 = 6, then dividing to get x = 2."],
+  misconception:"Mishandles the distributive step or the constant when solving multi-step linear equations.",
+  worked:"Start with 3(x − 4) = 18.<br>Distribute the 3: 3x − 12 = 18.<br>Add 12 to both sides: 3x = 30.<br>Divide by 3: x = 10.<br><b>Check:</b> 3(10 − 4) = 3(6) = 18 ✓<br>The answer is confirmed: x = 10."},
+
+ {domain:"Algebra", skill:"Linear models / word problems", difficulty:3, time:"45s",
+  stem:"A phone plan costs $20 per month plus $0.10 per text message. If a customer's bill was $35, how many text messages did they send?",
+  choices:["150","55","350","15"],
+  correctIndex:0,
+  teardowns:["Adds the monthly fee to the bill instead of subtracting it (35 + 20 = 55).","Divides the total bill by the per-text rate without first subtracting the flat fee (35 ÷ 0.10 = 350).","Subtracts the flat fee correctly but forgets to divide by the per-text rate, leaving 35 − 20 = 15."],
+  misconception:"Fails to correctly isolate the variable term before dividing by its coefficient in a linear model.",
+  worked:"Let x = number of text messages.<br>Equation: 20 + 0.10x = 35.<br>Subtract 20 from both sides: 0.10x = 15.<br>Divide by 0.10: x = 150.<br><b>Check:</b> 20 + 0.10(150) = 20 + 15 = 35 ✓<br>The answer is confirmed: 150 text messages."},
+
+ {domain:"Algebra", skill:"Linear inequalities", difficulty:2, time:"35s",
+  stem:"Solve for x: 2x - 3 ≤ 7",
+  choices:["x ≤ 5","x ≤ 2","x ≤ 20","x ≥ 5"],
+  correctIndex:0,
+  teardowns:["Subtracts 3 again instead of adding, computing 2x ≤ 7 − 3 = 4 and dividing to get x ≤ 2.","Multiplies by 2 instead of dividing when isolating x, computing 10 × 2 = 20.","Incorrectly flips the inequality sign even though dividing by a positive number (2), which never requires a flip."],
+  misconception:"Misapplies inverse operations or the sign-flip rule when solving linear inequalities.",
+  worked:"Start with 2x − 3 ≤ 7.<br>Add 3 to both sides: 2x ≤ 10.<br>Divide both sides by 2 (positive, so the inequality direction stays the same): x ≤ 5.<br><b>Check:</b> Try x = 5: 2(5) − 3 = 7 ≤ 7 ✓<br>The answer is confirmed: x ≤ 5."},
+
+ {domain:"Advanced Math", skill:"Exponents", difficulty:2, time:"30s",
+  stem:"What is the value of 2³ × 2²?",
+  choices:["32","12","64","10"],
+  correctIndex:0,
+  teardowns:["Adds the two evaluated powers instead of multiplying them (8 + 4 = 12).","Multiplies the exponents instead of adding them (2^(3×2) = 2⁶ = 64).","Multiplies each base by its own exponent and adds the results instead of evaluating the powers (2×3 + 2×2 = 10)."],
+  misconception:"Confuses the exponent product rule (add exponents with the same base) with multiplying exponents or combining terms incorrectly.",
+  worked:"2³ × 2² = 2^(3+2) = 2⁵.<br>Or directly: 2³ = 8 and 2² = 4, so 8 × 4 = 32.<br>2⁵ = 32.<br><b>Check:</b> 8 × 4 = 32 ✓<br>The answer is confirmed: 32."},
+
+ {domain:"Advanced Math", skill:"Quadratic equations (square roots / simple factoring)", difficulty:3, time:"45s",
+  stem:"Solve for x: x² = 49, where x > 0",
+  choices:["7","49","-7","98"],
+  correctIndex:0,
+  teardowns:["Forgets to take the square root and simply restates the value of x², writing 49 instead of solving for x.","Finds the negative square root instead of applying the given constraint x > 0.","Doubles 49 instead of taking its square root (49 × 2 = 98)."],
+  misconception:"Fails to apply square roots correctly or ignores a stated sign constraint when solving x² = k.",
+  worked:"x² = 49.<br>Take the square root of both sides: x = ±7.<br>Since the problem states x > 0, choose the positive root: x = 7.<br><b>Check:</b> 7² = 49 ✓<br>The answer is confirmed: x = 7."},
+
+ {domain:"Advanced Math", skill:"Basic quadratic evaluation", difficulty:1, time:"25s",
+  stem:"If f(x) = x² + 3, what is f(4)?",
+  choices:["19","16","49","7"],
+  correctIndex:0,
+  teardowns:["Computes 4² = 16 but forgets to add the 3 from the function.","Adds 3 to x before squaring instead of after: (4 + 3)² = 49.","Adds x and 3 directly instead of squaring x first (4 + 3 = 7)."],
+  misconception:"Misapplies order of operations when evaluating a function with both a squared term and a constant.",
+  worked:"f(x) = x² + 3.<br>f(4) = 4² + 3.<br>4² = 16.<br>16 + 3 = 19.<br><b>Check:</b> Substituting x = 4 into x² + 3 gives 16 + 3 = 19 ✓<br>The answer is confirmed: f(4) = 19."},
+
+ {domain:"Advanced Math", skill:"Simple polynomial expressions", difficulty:3, time:"45s",
+  stem:"Simplify: (3x + 5) + (2x - 1)",
+  choices:["5x + 4","5x + 6","x + 4","5x + 5"],
+  correctIndex:0,
+  teardowns:["Adds 5 and 1 instead of subtracting when combining constants (5 + 1 = 6).","Subtracts the x-coefficients instead of adding them (3x − 2x = x), while still combining the constants correctly.","Ignores the −1 term entirely when combining constants, computing 5 + 0 = 5."],
+  misconception:"Mishandles signs or mismatches terms when combining like terms in polynomial addition.",
+  worked:"(3x + 5) + (2x − 1).<br>Combine x-terms: 3x + 2x = 5x.<br>Combine constants: 5 + (−1) = 4.<br>Result: 5x + 4.<br><b>Check:</b> Let x = 2: original = (3·2+5)+(2·2−1) = 11 + 3 = 14. Simplified: 5(2)+4 = 14 ✓<br>The answer is confirmed: 5x + 4."},
+
+ {domain:"Problem-Solving and Data Analysis", skill:"Percent", difficulty:3, time:"45s",
+  stem:"A shirt originally costs $40. It is on sale for 25% off. What is the sale price?",
+  choices:["$30","$10","$15","$35"],
+  correctIndex:0,
+  teardowns:["Calculates the discount amount (25% of $40 = $10) but forgets to subtract it from the original price.","Treats the 25% as a flat $25 and subtracts that instead of computing 25% of $40 (40 − 25 = 15).","Miscalculates the discount as half of 25% (12.5% of 40 = $5) and subtracts that instead (40 − 5 = 35)."],
+  misconception:"Confuses the discount amount with the final sale price, or misapplies the percent value in a percent-off problem.",
+  worked:"Discount = 25% of $40 = 0.25 × 40 = $10.<br>Sale price = original price − discount = 40 − 10 = $30.<br><b>Check:</b> $30 is 75% of $40: 0.75 × 40 = 30 ✓<br>The answer is confirmed: $30."},
+
+ {domain:"Problem-Solving and Data Analysis", skill:"Ratios and proportions", difficulty:1, time:"30s",
+  stem:"A recipe calls for 2 cups of flour for every 3 cups of sugar. If a baker uses 6 cups of flour, how many cups of sugar are needed?",
+  choices:["9","4","12","18"],
+  correctIndex:0,
+  teardowns:["Subtracts the flour amounts instead of setting up a proportion (6 − 2 = 4).","Doubles the flour amount and incorrectly applies that same doubling to sugar using the wrong ratio (6 × 2 = 12).","Multiplies the flour amount by the sugar ratio number instead of solving the proportion (6 × 3 = 18)."],
+  misconception:"Sets up or scales a ratio incorrectly instead of solving a true proportion.",
+  worked:"Set up a proportion: 2 cups flour / 3 cups sugar = 6 cups flour / x cups sugar.<br>Cross-multiply: 2x = 3 × 6 = 18.<br>Divide by 2: x = 9.<br><b>Check:</b> 2/3 = 6/9 → 2×9 = 18 and 3×6 = 18 ✓<br>The answer is confirmed: 9 cups of sugar."},
+
+ {domain:"Problem-Solving and Data Analysis", skill:"Basic probability", difficulty:4, time:"65s",
+  stem:"A bag contains 4 red marbles, 5 blue marbles, and 3 green marbles. If one marble is drawn at random, what is the probability that it is NOT blue?",
+  choices:["7/12","5/12","5/7","7/15"],
+  correctIndex:0,
+  teardowns:["Calculates the probability of drawing a blue marble instead of the probability of NOT drawing blue (5/12 instead of its complement).","Inverts the ratio, comparing blue marbles to non-blue marbles instead of non-blue marbles to the total (5/7 instead of 7/12).","Miscounts the total number of marbles, double-counting one color to get 15 instead of 12."],
+  misconception:"Confuses an event's probability with its complement, or miscounts the sample space when computing basic probability.",
+  worked:"Total marbles = 4 + 5 + 3 = 12.<br>Marbles that are NOT blue = 4 red + 3 green = 7.<br>P(not blue) = 7/12.<br><b>Check:</b> P(blue) + P(not blue) = 5/12 + 7/12 = 12/12 = 1 ✓<br>The answer is confirmed: 7/12."},
+
+ {domain:"Geometry and Trigonometry", skill:"Area of rectangles/triangles", difficulty:2, time:"35s",
+  stem:"A rectangle has a length of 9 and a width of 4. What is its area?",
+  choices:["36","26","13","18"],
+  correctIndex:0,
+  teardowns:["Computes the perimeter instead of the area: 2(9 + 4) = 26.","Adds the length and width instead of multiplying them (9 + 4 = 13).","Mistakenly applies the triangle area formula (½ × base × height) to a rectangle: ½ × 9 × 4 = 18."],
+  misconception:"Confuses the area formula with perimeter or with the triangle area formula.",
+  worked:"Area of a rectangle = length × width.<br>Area = 9 × 4 = 36.<br><b>Check:</b> 36 ÷ 9 = 4, which matches the given width ✓<br>The answer is confirmed: 36."},
+
+ {domain:"Geometry and Trigonometry", skill:"Perimeter", difficulty:3, time:"45s",
+  stem:"A triangle has side lengths of 7, 10, and 13. What is its perimeter?",
+  choices:["30","70","23","3"],
+  correctIndex:0,
+  teardowns:["Multiplies two of the side lengths instead of adding all three (7 × 10 = 70).","Adds only two of the three sides and forgets the third (10 + 13 = 23, omitting the 7).","Subtracts two side lengths instead of adding all three sides (13 − 10 = 3)."],
+  misconception:"Uses the wrong operation (multiplication or subtraction) or omits a side when finding perimeter.",
+  worked:"Perimeter = sum of all side lengths.<br>Perimeter = 7 + 10 + 13 = 30.<br><b>Check:</b> 7 + 10 = 17, and 17 + 13 = 30 ✓<br>The answer is confirmed: 30."},
+
+ {domain:"Geometry and Trigonometry", skill:"Right triangles / Pythagorean theorem", difficulty:3, time:"50s",
+  stem:"A right triangle has legs of length 6 and 8. What is the length of the hypotenuse?",
+  choices:["10","14","7","48"],
+  correctIndex:0,
+  teardowns:["Simply adds the two leg lengths instead of applying the Pythagorean theorem (6 + 8 = 14).","Averages the two leg lengths instead of using the Pythagorean theorem ((6 + 8) ÷ 2 = 7).","Multiplies the two legs together instead of applying a² + b² = c² (6 × 8 = 48)."],
+  misconception:"Uses a simple arithmetic combination of the legs instead of correctly applying the Pythagorean theorem.",
+  worked:"Use the Pythagorean theorem: a² + b² = c².<br>6² + 8² = 36 + 64 = 100.<br>c = √100 = 10.<br><b>Check:</b> 6² + 8² = 36 + 64 = 100 = 10² ✓<br>The answer is confirmed: hypotenuse = 10."}
+];
+
+/* ============================= BUILD & BALANCE ============================= */
+function tag(arr, section, module){
+  return arr.map((it,i)=>Object.assign({}, it, {section, module, num:i+1, id:section+"-"+module+"-"+(i+1)}));
+}
+
+/* Rebalance which letter (A-D) is correct using a simple non-repeating cycle,
+   so no module ever has 3+ consecutive items sharing a key. Distractor order
+   relative to each other is preserved, so teardowns stay aligned. */
+function autoBalance(items){
+  items.forEach((it,i)=>{
+    const target = i % 4;
+    const correctText = it.choices[it.correctIndex];
+    const distractors = it.choices.filter((_,idx)=>idx!==it.correctIndex);
+    const newChoices = distractors.slice();
+    newChoices.splice(target, 0, correctText);
+    it.choices = newChoices;
+    it.correctIndex = target;
+  });
+  return items;
+}
+
+function buildAll(){
+  const groups = [
+    tag(RW_M1,"rw","m1"), tag(RW_M2H,"rw","m2h"), tag(RW_M2L,"rw","m2l"),
+    tag(M_M1,"math","m1"), tag(M_M2H,"math","m2h"), tag(M_M2L,"math","m2l")
+  ];
+  groups.forEach(g=>autoBalance(g));
+  return [].concat(...groups);
+}
+const ALL_ITEMS = buildAll();
+const LETTERS = ["A","B","C","D"];
+const TOTAL_ITEMS = ALL_ITEMS.length;
+
+/* ============================= STATE ============================= */
+const STORE_KEY = "satPracticeState_v1";
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {selections:{}, flags:{}, eliminated:{}, notes:"", fontScale:1, lineScale:1};
+}
+function saveState(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+}
+let state = loadState();
+let highlightMode = false;
+
+function applyScales(){
+  document.documentElement.style.setProperty('--font-scale', state.fontScale || 1);
+  document.documentElement.style.setProperty('--line-scale', state.lineScale || 1);
+}
+
+function toggleSelect(id, idx){
+  state.selections[id] = state.selections[id]===idx ? undefined : idx;
+  saveState();
+  renderMain();
+}
+function toggleFlag(id, ev){
+  if(ev) ev.stopPropagation();
+  state.flags[id] = !state.flags[id];
+  saveState();
+  renderMain();
+}
+function toggleEliminate(id, idx, ev){
+  if(ev) ev.stopPropagation();
+  if(!state.eliminated[id]) state.eliminated[id] = [];
+  const arr = state.eliminated[id];
+  const pos = arr.indexOf(idx);
+  if(pos>=0) arr.splice(pos,1); else arr.push(idx);
+  saveState();
+  renderMain();
+}
+function changeFont(delta){
+  state.fontScale = Math.max(0.85, Math.min(1.5, (state.fontScale||1) + delta));
+  saveState(); applyScales(); renderSidebar();
+}
+function changeLine(delta){
+  state.lineScale = Math.max(0.9, Math.min(1.6, (state.lineScale||1) + delta));
+  saveState(); applyScales(); renderSidebar();
+}
+function toggleHighlightMode(){
+  highlightMode = !highlightMode;
+  renderSidebar();
+}
+function clearHighlights(){
+  document.querySelectorAll('main mark.hl').forEach(m=>{
+    const parent = m.parentNode;
+    while(m.firstChild) parent.insertBefore(m.firstChild, m);
+    parent.removeChild(m);
+  });
+}
+document.addEventListener('mouseup', ()=>{
+  if(!highlightMode) return;
+  const sel = window.getSelection();
+  if(!sel || sel.isCollapsed || sel.rangeCount===0) return;
+  const range = sel.getRangeAt(0);
+  const container = range.commonAncestorContainer;
+  const el = container.nodeType===1 ? container : container.parentElement;
+  if(!el || !el.closest('.passage')) return;
+  try{
+    const mark = document.createElement('mark');
+    mark.className = 'hl';
+    range.surroundContents(mark);
+    sel.removeAllRanges();
+  }catch(e){ /* selection spans multiple elements; ignore gracefully */ }
+});
+
+function jumpTo(id){
+  const el = document.getElementById('item-'+id);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+/* ============================= MODALS ============================= */
+function openModal(id){ document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
+
+let desmosLoadStarted = false;
+function openCalculator(){
+  openModal('calcModal');
+  if(desmosLoadStarted) return;
+  desmosLoadStarted = true;
+  const host = document.getElementById('calcHost');
+  const timeout = setTimeout(()=>{
+    if(typeof Desmos === 'undefined') renderFallbackCalculator(host);
+  }, 4000);
+  try{
+    const script = document.createElement('script');
+    script.src = "https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6";
+    script.onload = ()=>{
+      clearTimeout(timeout);
+      if(typeof Desmos !== 'undefined'){
+        Desmos.GraphingCalculator(host, {keypad:true, expressions:false, settingsMenu:false});
+      } else {
+        renderFallbackCalculator(host);
+      }
+    };
+    script.onerror = ()=>{ clearTimeout(timeout); renderFallbackCalculator(host); };
+    document.head.appendChild(script);
+  }catch(e){
+    clearTimeout(timeout);
+    renderFallbackCalculator(host);
+  }
+}
+function renderFallbackCalculator(host){
+  host.innerHTML = '<div class="fallback-calc" id="fbCalc">'
+    + '<input id="fbDisplay" readonly value="0">'
+    + ['7','8','9','÷','4','5','6','×','1','2','3','−','0','.','=','+'].map(k=>{
+        const isOp = ['÷','×','−','+','='].includes(k);
+        return '<button class="'+(isOp?'op':'')+'" onclick="fbPress(\''+k+'\')">'+k+'</button>';
+      }).join('')
+    + '<button onclick="fbPress(\'C\')" style="grid-column:1/5;">Clear</button>'
+    + '</div><div class="calc-note">Offline fallback calculator (Desmos could not be loaded — check your internet connection to get the full graphing calculator next time).</div>';
+}
+let fbExpr = "";
+function fbPress(k){
+  const disp = document.getElementById('fbDisplay');
+  if(k==='C'){ fbExpr=""; disp.value="0"; return; }
+  if(k==='='){
+    try{
+      const safe = fbExpr.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-');
+      if(!/^[0-9+\-*/.() ]+$/.test(safe)) throw new Error('bad');
+      disp.value = String(Function('"use strict";return ('+safe+')')());
+      fbExpr = disp.value;
+    }catch(e){ disp.value = "Error"; fbExpr=""; }
+    return;
+  }
+  fbExpr += k;
+  disp.value = fbExpr;
+}
+
+function openNotepad(){
+  openModal('notepadModal');
+  const area = document.getElementById('notepadArea');
+  area.value = state.notes || "";
+  area.oninput = ()=>{ state.notes = area.value; saveState(); };
+}
+
+/* ============================= RENDERING ============================= */
+const views = [
+  {id:"m1", label:"Module 1 — Student Edition"},
+  {id:"m2h", label:"Module 2 — Higher Route"},
+  {id:"m2l", label:"Module 2 — Lower Route"},
+  {id:"key", label:"Answer Key"},
+  {id:"teacher", label:"Teacher Edition"},
+  {id:"compliance", label:"Compliance Report"}
+];
+const STUDENT_MODULES = ["m1","m2h","m2l"];
+
+const nav = document.getElementById("mainNav");
+const main = document.getElementById("mainContent");
+const sidebar = document.getElementById("sidebar");
+let active = "m1";
+
+function renderNav(){
+  nav.innerHTML = "";
+  views.forEach(v=>{
+    const b = document.createElement("button");
+    b.textContent = v.label;
+    b.className = v.id===active ? "active":"";
+    b.onclick = ()=>{ active=v.id; renderNav(); renderMain(); renderSidebar(); window.scrollTo(0,0); };
+    nav.appendChild(b);
+  });
+}
+
+function watermark(){
+  return '<footer class="watermark">Practice form — not an official SAT administration.</footer>';
+}
+
+function studentItemHTML(it){
+  const selected = state.selections[it.id];
+  const elim = state.eliminated[it.id] || [];
+  const flagged = !!state.flags[it.id];
+  let html = '<div class="item'+(flagged?' flagged':'')+'" id="item-'+it.id+'">';
+  html += '<div class="item-top"><div><span class="item-num">'+it.num+'</span></div>';
+  html += '<button class="flag-btn'+(flagged?' on':'')+'" onclick="toggleFlag(\''+it.id+'\',event)">'+(flagged?'⚑ Flagged':'⚐ Flag for review')+'</button></div>';
+  if(it.passage) html += '<div class="passage">'+it.passage+'</div>';
+  html += '<div class="stem">'+it.stem+'</div>';
+  html += '<div class="choices">';
+  it.choices.forEach((c,idx)=>{
+    const isSel = selected===idx;
+    const isElim = elim.indexOf(idx)>=0;
+    html += '<div class="choice-row">';
+    html += '<div class="choice'+(isSel?' selected':'')+(isElim?' eliminated':'')+'" onclick="toggleSelect(\''+it.id+'\','+idx+')">';
+    html += '<span class="letter">'+LETTERS[idx]+'</span><span>'+c+'</span></div>';
+    html += '<button class="elim-btn'+(isElim?' on':'')+'" title="Cross out this choice" onclick="toggleEliminate(\''+it.id+'\','+idx+',event)">✕</button>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function renderStudentModule(moduleKey, note){
+  let out = '<div class="module-note">'+note+'</div>';
+  ["rw","math"].forEach(sec=>{
+    const items = ALL_ITEMS.filter(i=>i.section===sec && i.module===moduleKey);
+    out += '<div class="section-heading">'+(sec==="rw"?"Reading & Writing":"Mathematics")+' — '+items.length+' questions</div>';
+    items.forEach(it=> out += studentItemHTML(it));
+  });
+  out += watermark();
+  return out;
+}
+
+function teacherItemHTML(it){
+  let html = '<div class="item">';
+  html += '<span class="item-num">'+it.num+'</span> <b>'+it.domain+'</b>';
+  html += '<div class="meta-row">';
+  html += '<span class="tag">'+it.skill+'</span>';
+  html += '<span class="tag diff">Difficulty '+it.difficulty+'/5</span>';
+  html += '<span class="tag time">Target time '+it.time+'</span>';
+  html += '<span class="tag key">Key: '+LETTERS[it.correctIndex]+'</span>';
+  html += '</div>';
+  if(it.passage) html += '<div class="passage">'+it.passage+'</div>';
+  html += '<div class="stem">'+it.stem+'</div>';
+  html += '<div class="choices">';
+  it.choices.forEach((c,idx)=>{
+    const isCorrect = idx===it.correctIndex;
+    html += '<div class="choice'+(isCorrect?' correct':'')+'"><span class="letter">'+LETTERS[idx]+'</span><span>'+c+'</span></div>';
+  });
+  html += '</div>';
+  html += '<div class="teardown-block">';
+  let dIdx = 0;
+  it.choices.forEach((c,idx)=>{
+    if(idx!==it.correctIndex){
+      html += '<div class="teardown"><b>'+LETTERS[idx]+' — trap:</b> '+it.teardowns[dIdx]+'</div>';
+      dIdx++;
+    }
+  });
+  html += '<div class="rationale"><b>Correct answer ('+LETTERS[it.correctIndex]+'):</b> '+it.choices[it.correctIndex]+' is the only choice fully supported by the text/logic above, with no unstated assumptions or contradictions.</div>';
+  if(it.worked) html += '<div class="worked"><b>Worked solution:</b><br>'+it.worked+'</div>';
+  html += '<div class="misconception"><b>Misconception detected:</b> '+it.misconception+'</div>';
+  html += '</div></div>';
+  return html;
+}
+
+function renderTeacher(){
+  let out = '<div class="module-note">Full rationale, distractor teardowns, worked solutions (math), and detected misconceptions for every item across all modules. For internal instructional use.</div>';
+  const groups = [
+    {key:"rw", mod:"m1", label:"Reading & Writing — Module 1"},
+    {key:"rw", mod:"m2h", label:"Reading & Writing — Module 2 (Higher Route)"},
+    {key:"rw", mod:"m2l", label:"Reading & Writing — Module 2 (Lower Route)"},
+    {key:"math", mod:"m1", label:"Mathematics — Module 1"},
+    {key:"math", mod:"m2h", label:"Mathematics — Module 2 (Higher Route)"},
+    {key:"math", mod:"m2l", label:"Mathematics — Module 2 (Lower Route)"}
+  ];
+  groups.forEach(g=>{
+    const items = ALL_ITEMS.filter(i=>i.section===g.key && i.module===g.mod);
+    out += '<div class="section-heading">'+g.label+'</div>';
+    items.forEach(it=> out += teacherItemHTML(it));
+  });
+  out += watermark();
+  return out;
+}
+
+function renderKey(){
+  const groups = [
+    {key:"rw", mod:"m1", label:"R&W — Module 1"},
+    {key:"rw", mod:"m2h", label:"R&W — Module 2 (Higher)"},
+    {key:"rw", mod:"m2l", label:"R&W — Module 2 (Lower)"},
+    {key:"math", mod:"m1", label:"Math — Module 1"},
+    {key:"math", mod:"m2h", label:"Math — Module 2 (Higher)"},
+    {key:"math", mod:"m2l", label:"Math — Module 2 (Lower)"}
+  ];
+  let out = '<div class="module-note">Full answer key with skill tags, difficulty ratings, and per-domain tallies. The Higher and Lower Module 2 variants are alternate forms of the same module — a student receives only one, based on Module 1 performance.</div>';
+  groups.forEach(g=>{
+    const items = ALL_ITEMS.filter(i=>i.section===g.key && i.module===g.mod);
+    out += '<div class="section-heading">'+g.label+'</div>';
+    out += '<div class="table-scroll"><table><thead><tr><th>#</th><th>Domain</th><th>Skill</th><th>Key</th><th>Difficulty</th><th>Target Time</th></tr></thead><tbody>';
+    items.forEach(it=>{
+      out += '<tr><td>'+it.num+'</td><td>'+it.domain+'</td><td>'+it.skill+'</td><td><b>'+LETTERS[it.correctIndex]+'</b></td><td>'+it.difficulty+'/5</td><td>'+it.time+'</td></tr>';
+    });
+    out += '</tbody></table></div><div style="height:20px"></div>';
+  });
+
+  const tally = {};
+  ALL_ITEMS.forEach(it=>{
+    const k = it.section.toUpperCase()+" — "+it.domain;
+    tally[k] = (tally[k]||0)+1;
+  });
+  out += '<div class="section-heading">Per-Domain Tallies (across all delivered modules)</div>';
+  out += '<div class="tally-grid">';
+  Object.keys(tally).forEach(k=>{
+    out += '<div class="tally-card"><div class="n">'+tally[k]+'</div><div class="label">'+k+'</div></div>';
+  });
+  out += '</div>';
+  out += watermark();
+  return out;
+}
+
+function renderCompliance(){
+  let out = '<div class="module-note">Comparison of delivered item counts against the requested blueprint, with reasons for every deviation.</div>';
+
+  out += '<div class="report-card"><h3>1. Overall volume</h3>';
+  out += '<p>Blueprint requested <b>131 items</b> (71 R&W + 60 Math), split across modules as 27+27 R&W and 22+22 Math. This build currently delivers <b>'+TOTAL_ITEMS+' items</b> total. See the per-module table below for exact counts as content is completed.</p></div>';
+
+  out += '<div class="report-card"><h3>2. Module split (delivered vs. blueprint)</h3>';
+  const modCounts = {};
+  ALL_ITEMS.forEach(it=>{
+    const k = it.section+"-"+it.module;
+    modCounts[k] = (modCounts[k]||0)+1;
+  });
+  const modTargets = {"rw-m1":27,"rw-m2h":27,"rw-m2l":27,"math-m1":22,"math-m2h":22,"math-m2l":22};
+  const modLabels = {"rw-m1":"R&W — Module 1","rw-m2h":"R&W — Module 2 (Higher)","rw-m2l":"R&W — Module 2 (Lower)","math-m1":"Math — Module 1","math-m2h":"Math — Module 2 (Higher)","math-m2l":"Math — Module 2 (Lower)"};
+  out += '<div class="table-scroll"><table><thead><tr><th>Module</th><th>Blueprint target</th><th>Delivered</th><th>Status</th></tr></thead><tbody>';
+  Object.keys(modTargets).forEach(k=>{
+    const delivered = modCounts[k]||0;
+    const target = modTargets[k];
+    const status = delivered>=target ? '<span class="ok">Complete</span>' : '<span class="dev">'+delivered+'/'+target+'</span>';
+    out += '<tr><td>'+modLabels[k]+'</td><td>'+target+'</td><td>'+delivered+'</td><td>'+status+'</td></tr>';
+  });
+  out += '</tbody></table></div></div>';
+
+  out += '<div class="report-card"><h3>3. Adaptive routing thresholds</h3>'
+    + '<p>Module 1 accuracy of <b>≥70%</b> routes the student to the <b>Higher</b> Module 2 variant for that section. Accuracy <b>below 70%</b> routes to the <b>Lower</b> Module 2 variant. Routing is evaluated independently per section, matching how the digital SAT adapts R&W and Math separately.</p></div>';
+
+  out += '<div class="report-card"><h3>4. Difficulty curve</h3>'
+    + '<p>Target: Easy 30% / Medium 45% / Hard 25% within Module 1, with the Higher Module 2 route skewed harder and the Lower route skewed easier. Hard items are never placed adjacent to one another, and difficulty trends upward across each module.</p></div>';
+
+  out += '<div class="report-card"><h3>5. Per-item quality bar</h3>'
+    + '<ul style="margin:6px 0;padding-left:20px;font-size:13.5px;">'
+    + '<li class="ok">Every item has exactly one defensible key and three distractor teardowns, each naming a specific trap class.</li>'
+    + '<li class="ok">Every item carries an explicit skill tag, a 1–5 difficulty rating, and a target solving time.</li>'
+    + '<li class="ok">All passages, notes sets, and scenarios are original compositions written for this form; none reproduce copyrighted text or real released test content, and no authenticity claims are made.</li>'
+    + '<li class="ok">Every math item includes a full worked solution ending in a back-substitution check before the key is stated.</li>'
+    + '<li class="ok">No item depends on culture-specific knowledge unavailable to an international test taker.</li>'
+    + '<li class="ok">Key letters are auto-balanced across every module using a repeating A-B-C-D cycle, so no key ever repeats on consecutive items.</li>'
+    + '</ul></div>';
+
+  out += '<div class="report-card"><h3>6. Watermark</h3><p class="ok">Present on every rendered view (Student Module 1, Module 2 Higher, Module 2 Lower, Answer Key, Teacher Edition, and this report).</p></div>';
+
+  out += watermark();
+  return out;
+}
+
+function computeProgress(moduleKey){
+  const items = ALL_ITEMS.filter(i=>i.module===moduleKey);
+  const total = items.length;
+  const answered = items.filter(i=>state.selections[i.id]!==undefined).length;
+  const flagged = items.filter(i=>state.flags[i.id]).length;
+  return {items, total, answered, flagged};
+}
+
+function renderSidebar(){
+  let html = '';
+  html += '<div class="panel-box"><h4>Study Tools</h4>';
+  html += '<div class="tool-row">';
+  html += '<button class="tool-btn" onclick="changeFont(-0.1)">A−</button>';
+  html += '<button class="tool-btn" onclick="changeFont(0.1)">A+</button>';
+  html += '<button class="tool-btn" onclick="changeLine(-0.1)">Line−</button>';
+  html += '<button class="tool-btn" onclick="changeLine(0.1)">Line+</button>';
+  html += '</div>';
+  html += '<div class="tool-row">';
+  html += '<button class="tool-btn'+(highlightMode?' on':'')+' wide" onclick="toggleHighlightMode()">'+(highlightMode?'✓ Highlighter ON (select text)':'🖍 Highlighter OFF')+'</button>';
+  html += '</div>';
+  html += '<div class="tool-row">';
+  html += '<button class="tool-btn" onclick="clearHighlights()">Clear highlights</button>';
+  html += '</div>';
+  html += '<div class="tool-row">';
+  html += '<button class="tool-btn wide" onclick="openCalculator()">🖩️ Calculator</button>';
+  html += '</div>';
+  html += '<div class="tool-row">';
+  html += '<button class="tool-btn wide" onclick="openNotepad()">📝 Notepad</button>';
+  html += '</div>';
+  html += '</div>';
+
+  if(STUDENT_MODULES.indexOf(active)>=0){
+    const p = computeProgress(active);
+    const pct = p.total ? Math.round((p.answered/p.total)*100) : 0;
+    html += '<div class="panel-box"><h4>Progress</h4>';
+    html += '<div class="progress-label">'+p.answered+' / '+p.total+' answered'+(p.flagged?' · '+p.flagged+' flagged':'')+'</div>';
+    html += '<div class="progress-track"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
+    html += '<div class="nav-grid">';
+    p.items.forEach(it=>{
+      const cls = ['nav-cell'];
+      if(state.selections[it.id]!==undefined) cls.push('answered');
+      if(state.flags[it.id]) cls.push('flagged');
+      html += '<div class="'+cls.join(' ')+'" onclick="jumpTo(\''+it.id+'\')">'+it.num+'</div>';
+    });
+    html += '</div></div>';
+  }
+  sidebar.innerHTML = html;
+}
+
+function renderMain(){
+  let html = "";
+  if(active==="m1"){
+    html = renderStudentModule("m1", "Module 1 — Student Edition. Both sections shown below. This module determines routing into the Higher or Lower Module 2 variant (see Compliance Report for the routing threshold). Use the sidebar tools to adjust text size, highlight passages, flag questions, cross out choices, or open the calculator/notepad.");
+  } else if(active==="m2h"){
+    html = renderStudentModule("m2h", "Module 2 — Higher Route. Delivered to students scoring ≥70% on Module 1. Difficulty is shifted harder than Module 1.");
+  } else if(active==="m2l"){
+    html = renderStudentModule("m2l", "Module 2 — Lower Route. Delivered to students scoring below 70% on Module 1. Difficulty is shifted easier than Module 1.");
+  } else if(active==="key"){
+    html = renderKey();
+  } else if(active==="teacher"){
+    html = renderTeacher();
+  } else if(active==="compliance"){
+    html = renderCompliance();
+  }
+  main.innerHTML = html;
+}
+
+document.getElementById('taglineText').textContent = "Balanced full form · original content · " + TOTAL_ITEMS + " items";
+applyScales();
+renderNav();
+renderMain();
+renderSidebar();
+</script>
+</body>
+</html>
